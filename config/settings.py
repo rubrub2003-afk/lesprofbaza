@@ -75,6 +75,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "content.context_processors.site_settings",  # настройки сайта во всех шаблонах
                 "catalog.context_processors.catalog_menu",    # меню категорий + счётчик корзины
+                "orders.context_processors.admin_badges",     # красные точки в админке
             ],
         },
     },

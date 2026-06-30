@@ -48,10 +48,16 @@ PAGES = [
      "<ul><li>Договор и полный пакет документов</li><li>Отсрочка для постоянных клиентов</li><li>Персональные условия при регулярных закупках</li></ul>"
      "<p>Свяжитесь с нами — подготовим коммерческое предложение.</p>"),
     ("kontakty", "Контакты",
-     "<p><b>Телефон:</b> +7 (985) 872-42-99</p><p><b>Запасной:</b> +7 (903) 750-51-51</p>"
+     "<p><b>Телефон:</b> <a href=\"tel:+79858724299\">+7 (985) 872-42-99</a> · "
+     "<a href=\"tel:+79037505151\">+7 (903) 750-51-51</a></p>"
+     "<p><b>Почта:</b> <a href=\"mailto:info@lesprofbaza.ru\">info@lesprofbaza.ru</a></p>"
      "<p><b>Часы работы:</b> ежедневно 9:00–18:00</p>"
      "<p><b>Адрес:</b> Московская обл., Красногорск, с. Николо-Урюпино, тер. Лесная, павильон З-9</p>"
-     "<p><b>WhatsApp:</b> +7 (985) 872-42-99 · <b>Telegram:</b> @nicknamedd · <b>Instagram:</b> les.prof.baza</p>"),
+     "<p><b>Мессенджеры:</b> "
+     "<a href=\"https://api.whatsapp.com/send?phone=79858724299\" target=\"_blank\" rel=\"noopener\">WhatsApp</a> · "
+     "<a href=\"https://t.me/nicknamedd\" target=\"_blank\" rel=\"noopener\">Telegram</a> · "
+     "<a href=\"https://t.me/LesProfBazaBot\" target=\"_blank\" rel=\"noopener\">Telegram-бот</a> · "
+     "<a href=\"https://instagram.com/les.prof.baza\" target=\"_blank\" rel=\"noopener\">Instagram</a></p>"),
     ("politika", "Политика конфиденциальности",
      "<p>Настоящая Политика описывает порядок обработки персональных данных. Оставляя заявку, вы соглашаетесь на обработку указанных вами данных (имя, телефон) в целях обработки заказа.</p>"
      "<p>Данные не передаются третьим лицам, кроме случаев, предусмотренных законом. Текст будет дополнен юридически корректной редакцией.</p>"),
@@ -75,9 +81,11 @@ class Command(BaseCommand):
         s.telegram = "https://t.me/nicknamedd"
         s.instagram = "https://instagram.com/les.prof.baza"
         s.tg_bot = "https://t.me/LesProfBazaBot"
-        org = quote("Лес Проф База Николо-Урюпино")
-        s.yandex_maps_url = "https://yandex.ru/maps/?text=" + org
-        s.map_embed = '<iframe title="Карта" loading="lazy" src="https://yandex.ru/map-widget/v1/?text=' + org + '&z=16"></iframe>'
+        # точная организация по ссылке клиента (одна точка, без "2 найдено")
+        s.yandex_maps_url = "https://yandex.ru/maps/-/CTajBA4w"
+        s.map_embed = ('<iframe title="ЛЕСПРОФБАЗА на карте" loading="lazy" '
+                       'src="https://yandex.ru/map-widget/v1/?ll=37.223203%2C55.804708&z=17'
+                       '&pt=37.223203,55.804708,pm2rdm"></iframe>')
         s.save()
 
         for name, desc in GROUP_DESC.items():

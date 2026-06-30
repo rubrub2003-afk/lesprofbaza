@@ -6,6 +6,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 {% load static %}<link rel="stylesheet" href="{% static 'css/calc.css' %}">
+<style>
+.combo{position:relative}
+.combo>input{width:100%;border:1.5px solid var(--line,#D6C8AC);border-radius:12px;padding:13px 40px 13px 14px;font-family:inherit;font-size:15px;background:#fff;outline:none}
+.combo>input:focus{border-color:#274A36;box-shadow:0 0 0 4px rgba(39,74,54,.1)}
+.combo::after{content:"▾";position:absolute;right:14px;top:13px;color:#8a7c66;pointer-events:none}
+.combo-list{position:absolute;left:0;right:0;top:52px;background:#fff;border:1.5px solid #D6C8AC;border-radius:12px;max-height:260px;overflow:auto;z-index:40;display:none;box-shadow:0 14px 34px rgba(27,26,23,.16)}
+.combo-list.show{display:block}
+.combo-list .grp{padding:7px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8a7c66;background:#F4ECDD;position:sticky;top:0}
+.combo-list .opt{padding:10px 14px;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.combo-list .opt:hover,.combo-list .opt.hl{background:#EFE6D5}
+.combo-list .opt .pr{color:#8a7c66;font-size:12.5px;white-space:nowrap}
+.combo-list .none{padding:12px 14px;color:#8a7c66;font-size:13.5px}
+.combo-hint{font-size:12.5px;color:#8a7c66;margin-top:6px}
+</style>
 </head>
 <body>
 <div class="top">
@@ -17,10 +31,13 @@
   <div class="grid">
     <div class="panel">
       <h2>Параметры</h2>
-      <div class="f"><label>Выберите товар</label><div class="inp"><select id="mat">
-        <option value="" disabled selected>— выберите товар из каталога —</option>
-        {% for cat, items in calc_groups %}<optgroup label="{{ cat }}">{% for p in items %}<option data-t="{{ p.thickness }}" data-w="{{ p.width }}" data-l="{{ p.length }}" data-p="{{ p.price|unlocalize }}">{{ p.name }}</option>{% endfor %}</optgroup>{% endfor %}
-      </select></div></div>
+      <div class="f"><label>Выберите товар</label>
+        <div class="combo">
+          <input id="matInput" type="text" placeholder="Начните вводить: доска, брус, вагонка…" autocomplete="off">
+          <div class="combo-list" id="matList"></div>
+        </div>
+        <div class="combo-hint">Живой поиск по ассортименту, который считается в м³. Можно и просто ввести размеры вручную.</div>
+      </div>
       <label>Размер одной единицы, мм (толщина × ширина × длина)</label>
       <div class="three" style="margin-bottom:10px">
         <div class="inp"><input id="t" class="num" type="number" value="25" min="1"><span class="u">мм</span></div>
@@ -54,14 +71,38 @@
 <script>
 var ru=function(n,d){return (isFinite(n)?n:0).toLocaleString('ru-RU',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});};
 var E=function(id){return document.getElementById(id);};
-var sel=E('mat');
-sel.addEventListener('change',function(){var o=sel.options[sel.selectedIndex];if(!o.dataset.t)return;E('t').value=o.dataset.t;E('w').value=o.dataset.w;E('l').value=o.dataset.l;E('price').value=o.dataset.p;recalc('dims');});
+var CALC=[{% for cat, items in calc_groups %}{% for p in items %}{n:"{{ p.name|escapejs }}",c:"{{ cat|escapejs }}",t:{{ p.thickness }},w:{{ p.width }},l:{{ p.length }},p:{{ p.price|unlocalize }}},{% endfor %}{% endfor %}];
+var inp=E('matInput'),list=E('matList'),hl=-1,view=[];
+function pick(o){E('t').value=o.t;E('w').value=o.w;E('l').value=o.l;E('price').value=o.p;inp.value=o.n;list.classList.remove('show');recalc('dims');}
+function clearMat(){inp.value='';}
+function norm(x){return (x||'').toLowerCase();}
+function renderList(){
+  var q=norm(inp.value).trim();
+  view=CALC.filter(function(o){return !q||norm(o.n).indexOf(q)>-1||norm(o.c).indexOf(q)>-1;});
+  if(!view.length){list.innerHTML='<div class="none">Ничего не нашли. Введите размеры вручную ниже.</div>';list.classList.add('show');return;}
+  var html='',lastC='';
+  view.forEach(function(o,i){if(o.c!==lastC){html+='<div class="grp">'+o.c+'</div>';lastC=o.c;}
+    html+='<div class="opt" data-i="'+i+'"><span>'+o.n+'</span><span class="pr">'+o.p.toLocaleString('ru-RU')+' ₽/м³</span></div>';});
+  list.innerHTML=html;list.classList.add('show');hl=-1;
+}
+list.addEventListener('mousedown',function(e){var el=e.target.closest('.opt');if(el)pick(view[+el.dataset.i]);});
+inp.addEventListener('input',renderList);
+inp.addEventListener('focus',renderList);
+inp.addEventListener('keydown',function(e){
+  var opts=list.querySelectorAll('.opt');
+  if(e.key==='ArrowDown'){hl=Math.min(hl+1,opts.length-1);}
+  else if(e.key==='ArrowUp'){hl=Math.max(hl-1,0);}
+  else if(e.key==='Enter'){if(opts[hl]){e.preventDefault();pick(view[+opts[hl].dataset.i]);}return;}
+  else return;
+  e.preventDefault();opts.forEach(function(o){o.classList.remove('hl')});if(opts[hl]){opts[hl].classList.add('hl');opts[hl].scrollIntoView({block:'nearest'});}
+});
+document.addEventListener('click',function(e){if(!e.target.closest('.combo'))list.classList.remove('show');});
 function vpp(){return (+E('t').value*+E('w').value*+E('l').value)/1e9;}
 function recalc(src){var v=vpp(),price=+E('price').value,qty=+E('qty').value,vol=+E('vol').value,cost=+E('cost').value;
  if(src==='qty'){vol=qty*v;cost=vol*price;}else if(src==='vol'){qty=v?vol/v:0;cost=vol*price;}else if(src==='cost'){vol=price?cost/price:0;qty=v?vol/v:0;}else{vol=qty*v;cost=vol*price;}
  if(src!=='vol')E('vol').value=+vol.toFixed(3);if(src!=='qty')E('qty').value=Math.round(qty*100)/100;if(src!=='cost')E('cost').value=Math.round(cost);
  E('rVol').textContent=ru(vol,3);E('rCost').textContent=ru(Math.round(cost));E('rQty').textContent=ru(Math.round(qty*100)/100)+' шт';E('rVpp').textContent=ru(v,3)+' м³';E('rPpp').textContent=ru(Math.round(v*price))+' ₽';}
-['t','w','l','price'].forEach(function(id){E(id).addEventListener('input',function(){sel.selectedIndex=0;recalc('dims')})});
+['t','w','l','price'].forEach(function(id){E(id).addEventListener('input',function(){recalc('dims')})});
 E('qty').addEventListener('input',function(){recalc('qty')});E('vol').addEventListener('input',function(){recalc('vol')});E('cost').addEventListener('input',function(){recalc('cost')});
 recalc('qty');
 </script>

@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from .models import Category, Product, Review
+from .models import Category, Product, Review, Label
 
 
 def _decorate(products):
@@ -25,6 +25,7 @@ def _render_list(request, category=None, title="Каталог пиломате�
     qs = qs.order_by("-is_popular", "category", "name")
     return render(request, "catalog/list.html", {
         "title": title, "products": _decorate(qs), "current_category": category,
+        "labels": Label.objects.all(),
     })
 
 
@@ -89,3 +90,11 @@ def compare_view(request):
     products = list(Product.objects.filter(slug__in=slugs, is_active=True).select_related("category"))
     products.sort(key=lambda p: slugs.index(p.slug) if p.slug in slugs else 0)
     return render(request, "catalog/compare.html", {"products": products})
+
+
+def favorites_view(request):
+    slugs = [x for x in (request.GET.get("items") or "").split(",") if x]
+    products = _decorate(Product.objects.filter(slug__in=slugs, is_active=True)
+                         .select_related("category").prefetch_related("labels"))
+    products.sort(key=lambda p: slugs.index(p.slug) if p.slug in slugs else 0)
+    return render(request, "catalog/favorites.html", {"products": products})

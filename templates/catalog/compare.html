@@ -20,11 +20,11 @@ td .nm{font-weight:700}.price{font-family:'Oswald';font-size:20px}
 .btn{display:inline-block;background:var(--forest);color:#fff;border-radius:10px;padding:12px 22px;font-weight:700}
 </style></head><body>
 <div class="wrap">
-  <div class="top"><a class="back" href="{% url 'catalog:index' %}">← В каталог</a><a href="#" onclick="localStorage.removeItem('lpb_compare');location.reload();return false" style="color:#9a3b2e">Очистить сравнение</a></div>
+  <div class="top"><a class="back" href="{% url 'catalog:index' %}">← В каталог</a><a href="#" onclick="localStorage.removeItem('lpb_compare');location.href='/catalog/compare/';return false" style="color:#9a3b2e">Очистить сравнение</a></div>
   <h1>Сравнение товаров</h1>
   {% if products %}
   <div style="overflow-x:auto"><table>
-    <tr><th>Товар</th>{% for p in products %}<td><a href="{{ p.get_absolute_url }}"><div class="ph"></div><div class="nm">{{ p.name }}</div></a></td>{% endfor %}</tr>
+    <tr><th>Товар</th>{% for p in products %}<td><a href="{{ p.get_absolute_url }}"><div class="ph"></div><div class="nm">{{ p.name }}</div></a><a href="#" onclick="rmCmp('{{ p.slug }}');return false" style="display:inline-block;margin-top:8px;color:#9a3b2e;font-size:12.5px">убрать ✕</a></td>{% endfor %}</tr>
     <tr><th>Цена</th>{% for p in products %}<td><span class="price">{{ p.price|floatformat:0|intcomma }}</span> {{ p.get_unit_display }}</td>{% endfor %}</tr>
     <tr><th>Размер</th>{% for p in products %}<td class="num">{{ p.dimensions }} мм</td>{% endfor %}</tr>
     <tr><th>Порода</th>{% for p in products %}<td>{{ p.get_species_display }}</td>{% endfor %}</tr>
@@ -37,4 +37,7 @@ td .nm{font-weight:700}.price{font-family:'Oswald';font-size:20px}
   <div class="empty">Вы пока не добавили товары к сравнению. Нажмите значок «⇄» на карточках товаров.<br><br><a class="btn" href="{% url 'catalog:index' %}">Перейти в каталог</a></div>
   {% endif %}
 </div>
+<script>
+function rmCmp(slug){try{var a=JSON.parse(localStorage.getItem('lpb_compare'))||[];var i=a.indexOf(slug);if(i>-1)a.splice(i,1);localStorage.setItem('lpb_compare',JSON.stringify(a));location.href='/catalog/compare/?items='+a.map(encodeURIComponent).join(',');}catch(e){location.reload();}}
+</script>
 </body></html>

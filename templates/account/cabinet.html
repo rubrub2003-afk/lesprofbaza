@@ -25,7 +25,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
 </style></head><body>
 <div class="top">
   <a class="logo" href="{% url 'content:home' %}"><img style="width:auto;height:46px" src="{% static 'img/emblem.png' %}" alt=""><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
-  <div class="right"><a class="lnk" href="{% url 'content:home' %}">← На сайт</a><a class="out" href="{% url 'orders:logout' %}">Выйти</a></div>
+  <div class="right"><a class="lnk favlink" href="{% url 'catalog:favorites' %}">Избранное</a><a class="lnk" href="{% url 'content:home' %}">← На сайт</a><a class="out" href="{% url 'orders:logout' %}">Выйти</a></div>
 </div>
 <div class="shell">
   <h1>Здравствуйте{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</h1>
@@ -55,8 +55,10 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
     <div class="cols">
       <div class="tile"><b>Статус заказа</b><small>Видите, на каком этапе ваш заказ.</small></div>
       <div class="tile"><b>История</b><small>Все прошлые заказы и быстрый повтор.</small></div>
-      <div class="tile"><b>Избранное</b><small>Сохранённые товары на любом устройстве.</small></div>
+      <a class="tile favlink" href="{% url 'catalog:favorites' %}" style="display:block"><b>Избранное</b><small>Сохранённые товары — нажмите, чтобы открыть.</small></a>
     </div>
   </div>
 </div>
+<script>window.CSRF="{{ csrf_token }}";</script>
+<script src="{% static 'js/shop.js' %}"></script>
 </body></html>

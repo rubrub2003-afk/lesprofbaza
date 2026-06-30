@@ -75,6 +75,8 @@ def add_to_cart(request, slug):
     cart = request.session.get("cart", {})
     cart[slug] = cart.get(slug, 0) + max(1, qty)
     request.session["cart"] = cart
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"ok": True, "count": sum(cart.values())})
     return redirect("orders:cart")
 
 

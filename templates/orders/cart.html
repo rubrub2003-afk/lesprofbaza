@@ -11,7 +11,7 @@
 <div class="topbar"><div class="wrap"><span>Москва и Московская область · доставка круглосуточно</span><span><a href="{% url 'content:page' 'kontakty' %}">Контакты</a></span></div></div>
 <header class="head"><div class="wrap">
   <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">корзина-заявка</span></span></a>
-  <div class="head-actions"><a class="iconbtn" href="{% url 'orders:account' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a></div>
+  <div class="head-actions"><a class="back" href="{% url 'content:home' %}">← На сайт</a><a class="iconbtn" href="{% url 'orders:account' %}" title="Кабинет"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a></div>
 </div></header>
 
 {% if success %}
@@ -29,7 +29,6 @@
 </div></div>
 {% else %}
 <div class="wrap" id="cartView">
-  <div style="padding:16px 0 0"><a class="back" href="{% url 'content:home' %}">← На сайт</a></div>
   <div class="steps"><span class="on">1 Корзина</span> <span>—</span> <b>2 Оформление</b> <span>—</span> <span>3 Готово</span></div>
   <h1 class="page">Ваша заявка</h1>
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="checkout">

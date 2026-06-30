@@ -50,7 +50,8 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("catalog:category", args=[self.slug])
+        # ведём на каталог с авто-фильтром по разделу (галочка проставляется сама)
+        return reverse("catalog:index") + "?cat=" + self.slug
 
     @property
     def is_group(self):
