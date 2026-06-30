@@ -7,7 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
 <style>.fav.on,[data-fav-slug].on{color:#B97E3F!important}.cmp.on{background:var(--forest)!important;color:#fff!important}.card.cmp-selected{outline:2px solid var(--forest);outline-offset:-2px}
-.empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}.btn-in{display:inline-block;background:var(--forest);color:#fff;border-radius:10px;padding:12px 22px;font-weight:700;margin-top:14px}</style>
+.empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}.btn-in{display:inline-block;background:var(--forest);color:#fff;border-radius:10px;padding:12px 22px;font-weight:700;margin-top:14px}
+.search{position:relative}.suggest{position:absolute;top:52px;left:0;right:0;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:none;z-index:60}.suggest.show{display:block}.suggest a{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;font-size:14px;border-bottom:1px solid var(--line)}.suggest a:last-child{border-bottom:0}.suggest a:hover{background:var(--sand)}.suggest .pr{color:var(--ink-soft);font-size:12.5px;white-space:nowrap}.suggest a.catrow{background:rgba(39,74,54,.06)}.suggest a.catrow .pr{color:var(--forest);font-weight:700}.suggest .empty{padding:12px 16px;color:var(--ink-soft);font-size:13.5px}</style>
 </head>
 <body>
 <div class="topbar"><div class="wrap"><span>Москва и Московская область · доставка круглосуточно</span><span><a href="{% url 'content:page' 'kontakty' %}">Контакты</a></span></div></div>
@@ -24,7 +25,13 @@
   <div class="crumbs"><a href="{% url 'content:home' %}">Главная</a> / Избранное</div>
   <div class="page-h"><h1>Избранное</h1><span class="cnt">{{ products|length }} товар(ов)</span></div>
 
-  {% if products %}
+  {% if not request.user.is_authenticated %}
+  <div class="empty">
+    <p style="font-size:17px">Избранное доступно после входа.</p>
+    <p>Войдите или зарегистрируйтесь — и сможете сохранять понравившиеся товары.</p>
+    <a class="btn-in" href="{% url 'orders:account' %}">Войти / Зарегистрироваться</a>
+  </div>
+  {% elif products %}
   <div class="prods" style="margin-top:18px">
     {% for p in products %}
     <article class="card" data-price="{{ p.price|unlocalize }}">

@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from .models import Category, Product, Review, Label
+from .models import Category, Product, Review, Label, Species
 
 
 def _decorate(products):
@@ -23,9 +23,11 @@ def _render_list(request, category=None, title="Каталог пиломате�
         else:
             qs = qs.filter(category=category)
     qs = qs.order_by("-is_popular", "category", "name")
+    used = set(qs.values_list("species", flat=True))
+    species_list = [(code, name) for code, name in Species.choices if code in used]
     return render(request, "catalog/list.html", {
         "title": title, "products": _decorate(qs), "current_category": category,
-        "labels": Label.objects.all(),
+        "labels": Label.objects.all(), "species_list": species_list,
     })
 
 

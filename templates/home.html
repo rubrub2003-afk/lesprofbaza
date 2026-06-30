@@ -46,7 +46,7 @@
         <div class="ph">
           <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
           <span class="stock">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
-          <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>
+          <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div>{% if request.user.is_authenticated %}<div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>{% endif %}
         </div>
         <div class="body">
           <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>

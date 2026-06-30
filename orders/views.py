@@ -7,6 +7,7 @@ from .models import Lead
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from .notifications import send_order_notification
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 def _digits(v):
@@ -150,3 +151,26 @@ def lead(request):
         name=request.POST.get("name", ""), phone=phone,
         comment=request.POST.get("comment", ""), product=product)
     return JsonResponse({"ok": True})
+
+
+def reorder(request, pk):
+    """Быстрый повтор заказа: переносит позиции прошлого заказа в корзину."""
+    if not request.user.is_authenticated:
+        return redirect("orders:account")
+    order = get_object_or_404(Order, pk=pk, user=request.user)
+    cart = request.session.get("cart", {})
+    for it in order.items.select_related("product").all():
+        p = it.product
+        if p and p.is_active:
+            cart[p.slug] = cart.get(p.slug, 0) + it.qty
+    request.session["cart"] = cart
+    return redirect("orders:cart")
+
+
+@staff_member_required
+def admin_stats(request):
+    """JSON-счётчики новых заказов/заявок для живого индикатора в админке."""
+    return JsonResponse({
+        "orders": Order.objects.filter(status="new").count(),
+        "leads": Lead.objects.filter(processed=False).count(),
+    })

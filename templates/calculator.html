@@ -8,17 +8,18 @@
 {% load static %}<link rel="stylesheet" href="{% static 'css/calc.css' %}">
 <style>
 .combo{position:relative}
-.combo>input{width:100%;border:1.5px solid var(--line,#D6C8AC);border-radius:12px;padding:13px 40px 13px 14px;font-family:inherit;font-size:15px;background:#fff;outline:none}
-.combo>input:focus{border-color:#274A36;box-shadow:0 0 0 4px rgba(39,74,54,.1)}
-.combo::after{content:"▾";position:absolute;right:14px;top:13px;color:#8a7c66;pointer-events:none}
-.combo-list{position:absolute;left:0;right:0;top:52px;background:#fff;border:1.5px solid #D6C8AC;border-radius:12px;max-height:260px;overflow:auto;z-index:40;display:none;box-shadow:0 14px 34px rgba(27,26,23,.16)}
+.combo>input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 38px 11px 12px;font-family:inherit;font-size:14.5px;background:#fff;outline:none}
+.combo>input:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(39,74,54,.12)}
+.combo::after{content:"▾";position:absolute;right:13px;top:11px;color:#8a7c66;pointer-events:none}
+.combo-list{position:absolute;left:0;right:0;top:46px;background:#fff;border:1.5px solid var(--line);border-radius:10px;max-height:250px;overflow:auto;z-index:40;display:none;box-shadow:0 14px 34px rgba(27,26,23,.18)}
 .combo-list.show{display:block}
-.combo-list .grp{padding:7px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8a7c66;background:#F4ECDD;position:sticky;top:0}
-.combo-list .opt{padding:10px 14px;font-size:14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.combo-list .grp{padding:6px 12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#8a7c66;background:#F4ECDD;position:sticky;top:0}
+.combo-list .opt{padding:9px 12px;font-size:13.5px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
 .combo-list .opt:hover,.combo-list .opt.hl{background:#EFE6D5}
-.combo-list .opt .pr{color:#8a7c66;font-size:12.5px;white-space:nowrap}
-.combo-list .none{padding:12px 14px;color:#8a7c66;font-size:13.5px}
-.combo-hint{font-size:12.5px;color:#8a7c66;margin-top:6px}
+.combo-list .opt .pr{color:#8a7c66;font-size:12px;white-space:nowrap}
+.combo-list .none{padding:11px 12px;color:#8a7c66;font-size:13px}
+.combo-hint{font-size:11.5px;color:#8a7c66;margin-top:6px}
+@media(max-width:540px){.top{flex-wrap:wrap;gap:10px}}
 </style>
 </head>
 <body>
@@ -27,7 +28,7 @@
   <a class="back" href="{% url 'content:home' %}">← На сайт</a>
 </div>
 <div class="shell">
-  <div class="head"><h1 style="font-family:'Oswald';text-transform:uppercase">Калькулятор пиломатериалов</h1><p>Объём и стоимость считаются на лету — в обе стороны: от количества к кубам, обратно и даже от бюджета.</p></div>
+  <div class="head"><h1 style="font-family:'Oswald';text-transform:uppercase">Калькулятор пиломатериалов</h1><p>Выберите любой товар из каталога — расчёт подстроится под его единицу (м³, м², шт или пог.м). Можно вводить и вручную.</p></div>
   <div class="grid">
     <div class="panel">
       <h2>Параметры</h2>
@@ -36,53 +37,90 @@
           <input id="matInput" type="text" placeholder="Начните вводить: доска, брус, вагонка…" autocomplete="off">
           <div class="combo-list" id="matList"></div>
         </div>
-        <div class="combo-hint">Живой поиск по ассортименту, который считается в м³. Можно и просто ввести размеры вручную.</div>
+        <div class="combo-hint">Поиск по всему ассортименту. Единица расчёта показана у каждого товара.</div>
       </div>
-      <label>Размер одной единицы, мм (толщина × ширина × длина)</label>
-      <div class="three" style="margin-bottom:10px">
-        <div class="inp"><input id="t" class="num" type="number" value="25" min="1"><span class="u">мм</span></div>
-        <div class="inp"><input id="w" class="num" type="number" value="100" min="1"><span class="u">мм</span></div>
-        <div class="inp"><input id="l" class="num" type="number" value="6000" min="1"><span class="u">мм</span></div>
+
+      <div id="dimsBlock">
+        <label>Размер одной единицы, мм (толщина × ширина × длина)</label>
+        <div class="three" style="margin-bottom:10px">
+          <div class="inp"><input id="t" class="num" type="number" value="25" min="1"><span class="u">мм</span></div>
+          <div class="inp"><input id="w" class="num" type="number" value="100" min="1"><span class="u">мм</span></div>
+          <div class="inp"><input id="l" class="num" type="number" value="6000" min="1"><span class="u">мм</span></div>
+        </div>
       </div>
-      <div class="f"><label>Цена за кубометр</label><div class="inp"><input id="price" class="num" type="number" value="14500" min="0"><span class="u">₽ / м³</span></div></div>
-      <label>Количество / объём — введите любое из двух</label>
-      <div class="io">
-        <div class="inp"><input id="qty" class="num" type="number" value="50" min="0"><span class="u">шт</span></div>
-        <div class="inp"><input id="vol" class="num" type="number" value="0.75" min="0" step="0.001"><span class="u">м³</span></div>
+
+      <div class="f"><label id="priceLbl">Цена за кубометр</label><div class="inp"><input id="price" class="num" type="number" value="14500" min="0"><span class="u" id="priceUnit">₽ / м³</span></div></div>
+
+      <div id="qtyM3">
+        <label>Количество / объём — введите любое из двух</label>
+        <div class="io">
+          <div class="inp"><input id="qty" class="num" type="number" value="50" min="0"><span class="u">шт</span></div>
+          <div class="inp"><input id="vol" class="num" type="number" value="0.75" min="0" step="0.001"><span class="u">м³</span></div>
+        </div>
       </div>
-      <div class="note">Товары по м² или штучно считает менеджер — оставьте заявку, поможем.</div>
+      <div id="qtyGen" style="display:none">
+        <label id="genLbl">Количество, м²</label>
+        <div class="inp"><input id="genqty" class="num" type="number" value="10" min="0" step="0.01"><span class="u" id="genUnit">м²</span></div>
+      </div>
     </div>
+
     <div class="panel result">
       <h2>Итог</h2>
-      <div class="big"><span class="lbl">Объём</span><span class="val"><span id="rVol" class="num">0,75</span><small>м³</small></span></div>
+      <div class="big" id="bigVol"><span class="lbl">Объём</span><span class="val"><span id="rVol" class="num">0,75</span><small>м³</small></span></div>
       <div class="big"><span class="lbl">Стоимость</span><span class="val"><span id="rCost" class="num">10 875</span><small>₽</small></span></div>
       <div class="divline"></div>
-      <div class="mini"><span>Количество</span><b class="num" id="rQty">50 шт</b></div>
-      <div class="mini"><span>Объём 1 шт</span><b class="num" id="rVpp">0,015 м³</b></div>
-      <div class="mini"><span>Цена за штуку</span><b class="num" id="rPpp">218 ₽</b></div>
+      <div class="mini" id="miniQty"><span>Количество</span><b class="num" id="rQty">50 шт</b></div>
+      <div class="mini" id="miniVpp"><span>Объём 1 шт</span><b class="num" id="rVpp">0,015 м³</b></div>
+      <div class="mini" id="miniPpp"><span>Цена за единицу</span><b class="num" id="rPpp">218 ₽</b></div>
       <div class="divline"></div>
       <label style="color:rgba(241,232,217,.82)">Задать бюджет</label>
       <div class="inp" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)"><input id="cost" class="num" type="number" value="10875" min="0" style="color:#fff"><span class="u" style="color:rgba(241,232,217,.7)">₽</span></div>
-      <button class="cta" onclick="location.href='{% url 'orders:cart' %}'">Добавить в корзину</button>
+      <button class="cta" onclick="location.href='{% url 'catalog:index' %}'">Перейти в каталог</button>
       <p class="note" style="color:rgba(241,232,217,.6)">Цена примерная. Точную с учётом доставки подтвердит менеджер.</p>
     </div>
   </div>
 </div>
 <script>
+var CALC=[{% for cat, items in calc_groups %}{% for p in items %}{n:"{{ p.name|escapejs }}",c:"{{ cat|escapejs }}",u:"{{ p.unit }}",ud:"{{ p.get_unit_display|escapejs }}",t:{{ p.thickness|default:0 }},w:{{ p.width|default:0 }},l:{{ p.length|default:0 }},p:{{ p.price|unlocalize }}},{% endfor %}{% endfor %}];
+var UNIT_RU={m3:'м³',m2:'м²',pc:'шт',rm:'пог.м'};
 var ru=function(n,d){return (isFinite(n)?n:0).toLocaleString('ru-RU',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});};
 var E=function(id){return document.getElementById(id);};
-var CALC=[{% for cat, items in calc_groups %}{% for p in items %}{n:"{{ p.name|escapejs }}",c:"{{ cat|escapejs }}",t:{{ p.thickness }},w:{{ p.width }},l:{{ p.length }},p:{{ p.price|unlocalize }}},{% endfor %}{% endfor %}];
+var mode='m3';
+
 var inp=E('matInput'),list=E('matList'),hl=-1,view=[];
-function pick(o){E('t').value=o.t;E('w').value=o.w;E('l').value=o.l;E('price').value=o.p;inp.value=o.n;list.classList.remove('show');recalc('dims');}
-function clearMat(){inp.value='';}
+function setMode(u){
+  mode=(u==='m2'||u==='pc'||u==='rm')?u:'m3';
+  var ru1=UNIT_RU[mode];
+  E('priceUnit').textContent='₽ / '+ru1;
+  if(mode==='m3'){
+    E('priceLbl').textContent='Цена за кубометр';
+    E('dimsBlock').style.display='';E('qtyM3').style.display='';E('qtyGen').style.display='none';
+    E('bigVol').style.display='';E('miniVpp').style.display='';
+    E('miniPpp').querySelector('span').textContent='Цена за штуку';
+  }else{
+    E('priceLbl').textContent='Цена за '+(mode==='pc'?'штуку':(mode==='m2'?'м²':'пог.м'));
+    E('dimsBlock').style.display='none';E('qtyM3').style.display='none';E('qtyGen').style.display='';
+    E('bigVol').style.display='none';E('miniVpp').style.display='none';
+    E('genLbl').textContent='Количество, '+ru1;E('genUnit').textContent=ru1;
+    E('miniQty').querySelector('span').textContent='Количество';
+    E('miniPpp').querySelector('span').textContent='Цена за единицу';
+  }
+}
+function pick(o){
+  setMode(o.u);
+  E('price').value=o.p;
+  if(mode==='m3'){E('t').value=o.t||25;E('w').value=o.w||100;E('l').value=o.l||6000;recalc('dims');}
+  else{recalc('gen');}
+  inp.value=o.n+'  ('+o.ud+')';list.classList.remove('show');
+}
 function norm(x){return (x||'').toLowerCase();}
 function renderList(){
   var q=norm(inp.value).trim();
   view=CALC.filter(function(o){return !q||norm(o.n).indexOf(q)>-1||norm(o.c).indexOf(q)>-1;});
-  if(!view.length){list.innerHTML='<div class="none">Ничего не нашли. Введите размеры вручную ниже.</div>';list.classList.add('show');return;}
+  if(!view.length){list.innerHTML='<div class="none">Ничего не нашли. Введите параметры вручную.</div>';list.classList.add('show');return;}
   var html='',lastC='';
   view.forEach(function(o,i){if(o.c!==lastC){html+='<div class="grp">'+o.c+'</div>';lastC=o.c;}
-    html+='<div class="opt" data-i="'+i+'"><span>'+o.n+'</span><span class="pr">'+o.p.toLocaleString('ru-RU')+' ₽/м³</span></div>';});
+    html+='<div class="opt" data-i="'+i+'"><span>'+o.n+'</span><span class="pr">'+o.p.toLocaleString('ru-RU')+' ₽/'+UNIT_RU[(o.u==='m2'||o.u==='pc'||o.u==='rm')?o.u:'m3']+'</span></div>';});
   list.innerHTML=html;list.classList.add('show');hl=-1;
 }
 list.addEventListener('mousedown',function(e){var el=e.target.closest('.opt');if(el)pick(view[+el.dataset.i]);});
@@ -97,13 +135,37 @@ inp.addEventListener('keydown',function(e){
   e.preventDefault();opts.forEach(function(o){o.classList.remove('hl')});if(opts[hl]){opts[hl].classList.add('hl');opts[hl].scrollIntoView({block:'nearest'});}
 });
 document.addEventListener('click',function(e){if(!e.target.closest('.combo'))list.classList.remove('show');});
+
 function vpp(){return (+E('t').value*+E('w').value*+E('l').value)/1e9;}
-function recalc(src){var v=vpp(),price=+E('price').value,qty=+E('qty').value,vol=+E('vol').value,cost=+E('cost').value;
- if(src==='qty'){vol=qty*v;cost=vol*price;}else if(src==='vol'){qty=v?vol/v:0;cost=vol*price;}else if(src==='cost'){vol=price?cost/price:0;qty=v?vol/v:0;}else{vol=qty*v;cost=vol*price;}
- if(src!=='vol')E('vol').value=+vol.toFixed(3);if(src!=='qty')E('qty').value=Math.round(qty*100)/100;if(src!=='cost')E('cost').value=Math.round(cost);
- E('rVol').textContent=ru(vol,3);E('rCost').textContent=ru(Math.round(cost));E('rQty').textContent=ru(Math.round(qty*100)/100)+' шт';E('rVpp').textContent=ru(v,3)+' м³';E('rPpp').textContent=ru(Math.round(v*price))+' ₽';}
+function recalc(src){
+  var price=+E('price').value,cost=+E('cost').value;
+  if(mode==='m3'){
+    var v=vpp(),qty=+E('qty').value,vol=+E('vol').value;
+    if(src==='qty'){vol=qty*v;cost=vol*price;}
+    else if(src==='vol'){qty=v?vol/v:0;cost=vol*price;}
+    else if(src==='cost'){vol=price?cost/price:0;qty=v?vol/v:0;}
+    else{vol=qty*v;cost=vol*price;}
+    if(src!=='vol')E('vol').value=+vol.toFixed(3);
+    if(src!=='qty')E('qty').value=Math.round(qty*100)/100;
+    if(src!=='cost')E('cost').value=Math.round(cost);
+    E('rVol').textContent=ru(vol,3);E('rCost').textContent=ru(Math.round(cost));
+    E('rQty').textContent=ru(Math.round(qty*100)/100)+' шт';
+    E('rVpp').textContent=ru(v,3)+' м³';E('rPpp').textContent=ru(Math.round(v*price))+' ₽';
+  }else{
+    var Q=+E('genqty').value;
+    if(src==='cost'){Q=price?cost/price:0;E('genqty').value=Math.round(Q*100)/100;}
+    else{cost=Q*price;E('cost').value=Math.round(cost);}
+    E('rCost').textContent=ru(Math.round(cost));
+    E('rQty').textContent=ru(Math.round(Q*100)/100)+' '+UNIT_RU[mode];
+    E('rPpp').textContent=ru(Math.round(price))+' ₽';
+  }
+}
 ['t','w','l','price'].forEach(function(id){E(id).addEventListener('input',function(){recalc('dims')})});
-E('qty').addEventListener('input',function(){recalc('qty')});E('vol').addEventListener('input',function(){recalc('vol')});E('cost').addEventListener('input',function(){recalc('cost')});
+E('qty').addEventListener('input',function(){recalc('qty')});
+E('vol').addEventListener('input',function(){recalc('vol')});
+E('genqty').addEventListener('input',function(){recalc('gen')});
+E('price').addEventListener('input',function(){recalc(mode==='m3'?'dims':'gen')});
+E('cost').addEventListener('input',function(){recalc('cost')});
 recalc('qty');
 </script>
 </body>

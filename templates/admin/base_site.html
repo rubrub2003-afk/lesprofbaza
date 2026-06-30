@@ -10,18 +10,44 @@
 </style>
 <script>
 (function(){
-  var O={{ admin_new_orders|default:0 }}, L={{ admin_new_leads|default:0 }};
-  function tag(suffix,n){
-    if(!n)return;
+  var STATS_URL="/staff/stats/";
+  var baseTitle=document.title.replace(/^\(\d+\)\s*/,'');
+  var last=null;
+  function setDot(suffix,n){
     document.querySelectorAll('a[href$="'+suffix+'"]').forEach(function(a){
-      if(a.querySelector('.lpb-dot'))return;
-      var s=document.createElement('span');s.className='lpb-dot';s.textContent=n;s.title='Новых: '+n;
-      a.appendChild(s);
+      var s=a.querySelector('.lpb-dot');
+      if(n>0){ if(!s){s=document.createElement('span');s.className='lpb-dot';a.appendChild(s);} s.textContent=n; s.title='Новых: '+n; }
+      else if(s){ s.remove(); }
     });
   }
+  function applyDots(O,L){
+    setDot('/orders/order/',O);
+    setDot('/orders/lead/',L);
+    var t=O+L;
+    document.title=(t>0?'('+t+') ':'')+baseTitle;
+  }
+  function notify(diff){
+    var b=document.createElement('div');
+    b.textContent='🔔 Новых обращений: +'+diff;
+    b.style.cssText='position:fixed;right:18px;bottom:18px;background:#d23b2e;color:#fff;padding:12px 18px;border-radius:10px;font-weight:700;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.3)';
+    document.body.appendChild(b);
+    try{var a=new (window.AudioContext||window.webkitAudioContext)();var o=a.createOscillator();var g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.value=0.05;o.start();o.stop(a.currentTime+0.18);}catch(e){}
+    setTimeout(function(){b.style.transition='opacity .4s';b.style.opacity='0';setTimeout(function(){b.remove();},400);},5000);
+  }
+  function poll(){
+    fetch(STATS_URL,{headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        applyDots(d.orders,d.leads);
+        var t=d.orders+d.leads;
+        if(last!==null && t>last){ notify(t-last); }
+        last=t;
+      }).catch(function(){});
+  }
   document.addEventListener('DOMContentLoaded',function(){
-    tag('/orders/order/',O);
-    tag('/orders/lead/',L);
+    last={{ admin_new_orders|default:0 }}+{{ admin_new_leads|default:0 }};
+    applyDots({{ admin_new_orders|default:0 }},{{ admin_new_leads|default:0 }});
+    setInterval(poll, 20000);
   });
 })();
 </script>

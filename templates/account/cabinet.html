@@ -33,7 +33,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
 
   {% if active %}
   <div class="card">
-    <h2>Активный заказ №{{ active.pk }}</h2>
+    <h2>Активный заказ</h2>
     <div class="row"><span>Статус</span><span class="badge {% if active.status == 'new' %}b-new{% elif active.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ active.get_status_display }}</span></div>
     <div class="row"><span>Получение</span><span>{{ active.get_receive_display }}</span></div>
     <div class="row"><span>Сумма (предв.)</span><b class="num">{{ active.total|floatformat:0|intcomma }} ₽</b></div>
@@ -44,8 +44,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
   <div class="card">
     <h2>История заказов</h2>
     {% if orders %}
-    <table><tr><th>№</th><th>Дата</th><th>Получение</th><th>Сумма</th><th>Статус</th></tr>
-      {% for o in orders %}<tr><td>{{ o.pk }}</td><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td></tr>{% endfor %}
+    <table><tr><th>Дата</th><th>Получение</th><th>Сумма</th><th>Статус</th><th></th></tr>
+      {% for o in orders %}<tr><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td><td><a href="{% url 'orders:reorder' o.pk %}" style="color:var(--forest);font-weight:700;white-space:nowrap">↻ Повторить</a></td></tr>{% endfor %}
     </table>
     {% else %}<div class="empty">Заказов пока нет. <a href="{% url 'catalog:index' %}" style="color:var(--forest);font-weight:700">Перейти в каталог →</a></div>{% endif %}
   </div>

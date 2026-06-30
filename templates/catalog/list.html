@@ -14,7 +14,7 @@
   <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">пиломатериалы · Москва и МО</span></span></a>
   <form class="search" onsubmit="return false" autocomplete="off"><input id="searchInput" type="text" placeholder="Поиск: доска, брус, вагонка…"><button><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><div class="suggest" id="suggest"></div></form>
   <div class="head-actions">
-    <a class="iconbtn favlink" href="{% url 'catalog:favorites' %}" title="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg><span class="favn" style="display:none">0</span></a>
+    {% if request.user.is_authenticated %}<a class="iconbtn favlink" href="{% url 'catalog:favorites' %}" title="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="favn" style="display:none">0</span></a>{% endif %}
     <a class="iconbtn" href="{% url 'orders:account' %}" title="Кабинет"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a>
     <a class="iconbtn cart" href="{% url 'orders:cart' %}" title="Корзина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h2l2.5 12h9L21 8H7"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17.5" cy="20" r="1.4"/></svg><span>{{ cart_count }}</span></a>
   </div>
@@ -29,6 +29,9 @@
       <div class="fg"><h4>Категории</h4>
         {% for g in catalog_groups %}<label class="chk"><input type="checkbox" class="fcat" value="{{ g.slug }}">{{ g.name }}</label>{% endfor %}
       </div>
+      {% if species_list %}<div class="fg"><h4>Порода</h4>
+        {% for code, name in species_list %}<label class="chk"><input type="checkbox" class="fspec" value="{{ code }}">{{ name }}</label>{% endfor %}
+      </div>{% endif %}
       {% if labels %}<div class="fg"><h4>Метки</h4>
         {% for l in labels %}<label class="chk"><input type="checkbox" class="flabel" value="{{ l.id }}">{{ l.name }}</label>{% endfor %}
       </div>{% endif %}
@@ -52,18 +55,18 @@
 
       <div class="prods" id="prods">
         {% for p in products %}
-        <article class="card" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}">
+        <article class="card" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}">
           <div class="ph">
             <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
             <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
-            <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>
+            <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div>{% if request.user.is_authenticated %}<div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>{% endif %}
           </div>
           <div class="body">
             <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>
             <h3>{{ p.name }}</h3>
             <div class="meta">{{ p.get_species_display }}{% if p.grade %} · {{ p.grade }}{% endif %}</div>
             <div class="price">{% if p.old_price %}<span class="old num">{{ p.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ p.price|floatformat:0|intcomma }}</b><span class="unit">{{ p.get_unit_display }}</span></div>
-            <div class="actions"><button class="btn btn-forest" onclick="addCart('{{ p.slug }}',1,this,event)">В корзину</button><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый</a></div>
+            <div class="actions"><button class="btn btn-forest" onclick="addCart('{{ p.slug }}',1,this,event)">В корзину</button><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый заказ</a></div>
           </div>
         </article>
         {% endfor %}
@@ -80,16 +83,17 @@
 var cards=[].slice.call(document.querySelectorAll('#prods .card'));
 var FKEY='lpb_filters';
 function sel(q){return [].slice.call(document.querySelectorAll(q+':checked')).map(function(c){return c.value;});}
-function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),labels:sel('.flabel'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
+function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),labels:sel('.flabel'),species:sel('.fspec'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
 function applyF(){
-  var cats=sel('.fcat'),labels=sel('.flabel'),stocks=sel('.fstock');
+  var cats=sel('.fcat'),labels=sel('.flabel'),species=sel('.fspec'),stocks=sel('.fstock');
   var pmin=parseFloat(document.getElementById('pmin').value)||0;
   var pmax=parseFloat(document.getElementById('pmax').value)||1e12;
   var shown=0;
   cards.forEach(function(c){
     var cl=(c.dataset.labels||'').trim().split(/\s+/);
     var okLabel=!labels.length||labels.some(function(id){return cl.indexOf(id)>-1;});
-    var ok=(!cats.length||cats.indexOf(c.dataset.cat)>-1)&&okLabel&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
+    var okSpec=!species.length||species.indexOf(c.dataset.species)>-1;
+    var ok=(!cats.length||cats.indexOf(c.dataset.cat)>-1)&&okLabel&&okSpec&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
     c.style.display=ok?'':'none'; if(ok)shown++;
   });
   var sv=document.getElementById('sort').value, box=document.getElementById('prods');
@@ -103,7 +107,7 @@ function applyF(){
   if(!shown){var d=document.createElement('div');d.className='empty';d.textContent='Ничего не найдено. Сбросьте фильтры или напишите менеджеру — поможем подобрать.';box.appendChild(d);}
   saveState();
 }
-document.querySelectorAll('.fcat,.flabel,.fstock').forEach(function(c){c.addEventListener('change',applyF);});
+document.querySelectorAll('.fcat,.flabel,.fspec,.fstock').forEach(function(c){c.addEventListener('change',applyF);});
 document.getElementById('pmin').addEventListener('input',applyF);document.getElementById('pmax').addEventListener('input',applyF);
 function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.getElementById('sort').value='pop';try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
 (function(){
@@ -112,6 +116,7 @@ function resetF(){document.querySelectorAll('.filters input').forEach(function(i
   else{try{var st=JSON.parse(localStorage.getItem(FKEY));if(st){
     (st.cats||[]).forEach(function(v){var e=document.querySelector('.fcat[value="'+v+'"]');if(e)e.checked=true;});
     (st.labels||[]).forEach(function(v){var e=document.querySelector('.flabel[value="'+v+'"]');if(e)e.checked=true;});
+    (st.species||[]).forEach(function(v){var e=document.querySelector('.fspec[value="'+v+'"]');if(e)e.checked=true;});
     (st.stocks||[]).forEach(function(v){var e=document.querySelector('.fstock[value="'+v+'"]');if(e)e.checked=true;});
     if(st.pmin)document.getElementById('pmin').value=st.pmin;
     if(st.pmax)document.getElementById('pmax').value=st.pmax;

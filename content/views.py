@@ -22,8 +22,7 @@ def static_page(request, slug):
 
 def calculator(request):
     from itertools import groupby
-    m3 = (Product.objects.filter(unit="m3", thickness__isnull=False, width__isnull=False,
-                                 length__isnull=False, is_active=True)
-          .select_related("category").order_by("category__name", "thickness", "width"))
-    groups = [(cat, list(items)) for cat, items in groupby(m3, key=lambda p: p.category.name)]
+    qs = (Product.objects.filter(is_active=True).select_related("category")
+          .order_by("category__name", "name"))
+    groups = [(cat, list(items)) for cat, items in groupby(qs, key=lambda p: p.category.name)]
     return render(request, "calculator.html", {"calc_groups": groups})
