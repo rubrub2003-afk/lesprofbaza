@@ -1,0 +1,62 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Личный кабинет — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head><body>
+<div class="top">
+  <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
+  <a class="back" href="{% url 'content:home' %}">← На сайт</a>
+</div>
+<div class="shell"><div class="card">
+  <div class="tabs"><button id="tab-login" class="active" onclick="show('login')">Вход</button><button id="tab-reg" onclick="show('reg')">Регистрация</button></div>
+  {% if error %}<div style="margin:16px 30px 0;padding:11px 14px;border-radius:10px;background:rgba(154,59,46,.1);border:1px solid rgba(154,59,46,.4);color:#9a3b2e;font-size:13.5px">{{ error }}</div>{% endif %}
+
+  <div id="pane-login" class="pane active">
+    <h1>С возвращением</h1><p class="sub">Войдите, чтобы видеть статус заказа, историю и избранное.</p>
+    <form method="post" action="{% url 'orders:login' %}">{% csrf_token %}
+      <div class="field"><label>Телефон или e-mail</label><input type="text" name="login" placeholder="+7 (___) ___-__-__" required></div>
+      <div class="field"><label>Пароль</label><input id="p1" name="password" type="password" placeholder="Ваш пароль" required><span class="eye" onclick="toggle('p1',this)">показать</span></div>
+      <div class="row-between"><label style="margin:0;display:flex;gap:7px;align-items:center;font-weight:600"><input type="checkbox"> Запомнить меня</label><a href="#" onclick="show('forgot');return false">Забыли пароль?</a></div>
+      <button class="btn" type="submit">Войти</button>
+      <div class="sep">или войдите через</div>
+      <div class="alts" style="flex-wrap:wrap"><a href="#">Telegram</a><a href="#">WhatsApp</a><a href="#">MAX</a><a href="#">Google</a></div>
+    </form>
+    <div class="guest">Нет аккаунта? <a href="#" onclick="show('reg');return false">Зарегистрироваться</a><br>или <a href="{% url 'content:home' %}">оформить заказ без регистрации →</a></div>
+  </div>
+
+  <div id="pane-forgot" class="pane">
+    <h1>Сброс пароля</h1><p class="sub">Выберите, как удобнее получить код для сброса — на телефон или на e-mail.</p>
+    <div class="seg"><button type="button" id="m-phone" class="seg-b active" onclick="fmethod('phone')">По телефону</button><button type="button" id="m-email" class="seg-b" onclick="fmethod('email')">По e-mail</button></div>
+    <form onsubmit="document.getElementById('forgot-ok').style.display='block';return false">
+      <div class="field"><label id="fLabel">Телефон</label><input id="fInput" type="tel" placeholder="+7 (___) ___-__-__"></div>
+      <button class="btn" type="submit">Прислать код для сброса</button>
+    </form>
+    <div id="forgot-ok" class="note" style="display:none;margin-top:16px">Готово! Если такой аккаунт существует, мы отправили код по выбранному способу.</div>
+    <div class="guest">Нет доступа ни к телефону, ни к почте? <a href="#">Напишите менеджеру</a>.<br><a href="#" onclick="show('login');return false">← Вернуться ко входу</a></div>
+  </div>
+
+  <div id="pane-reg" class="pane">
+    <h1>Создать аккаунт</h1><p class="sub">Чтобы следить за заказами и хранить избранное. Заказывать можно и без него.</p>
+    <div class="note">История заказов, статус активного заказа, сохранённые адреса и избранное в одном месте.</div>
+    <form method="post" action="{% url 'orders:register' %}">{% csrf_token %}
+      <div class="field"><label>Имя</label><input type="text" name="name" placeholder="Как к вам обращаться"></div>
+      <div class="field"><label>Телефон</label><input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required></div>
+      <div class="field"><label>E-mail (необязательно)</label><input type="email" name="email" placeholder="you@example.ru"></div>
+      <div class="field"><label>Пароль</label><input id="p2" name="password" type="password" placeholder="Придумайте пароль" required><span class="eye" onclick="toggle('p2',this)">показать</span></div>
+      <label class="check"><input type="checkbox" required> Я соглашаюсь на обработку персональных данных и принимаю <a href="{% url 'content:page' 'politika' %}">политику конфиденциальности</a></label>
+      <button class="btn" type="submit">Зарегистрироваться</button>
+    </form>
+    <div class="guest">Уже есть аккаунт? <a href="#" onclick="show('login');return false">Войти</a></div>
+  </div>
+</div></div>
+<script>
+function show(w){['login','reg','forgot'].forEach(function(k){var el=document.getElementById('pane-'+k);if(el)el.classList.toggle('active',w===k);});document.getElementById('tab-login').classList.toggle('active',w==='login');document.getElementById('tab-reg').classList.toggle('active',w==='reg');}
+function toggle(id,el){var i=document.getElementById(id);var s=i.type==='password';i.type=s?'text':'password';el.textContent=s?'скрыть':'показать';}
+function fmethod(w){document.getElementById('m-phone').classList.toggle('active',w==='phone');document.getElementById('m-email').classList.toggle('active',w==='email');document.getElementById('fLabel').textContent=w==='phone'?'Телефон':'E-mail';document.getElementById('fInput').placeholder=w==='phone'?'+7 (___) ___-__-__':'you@example.ru';}
+show("{{ tab|default:'login' }}");
+</script>
+<script src="{% static 'js/site.js' %}"></script>
+</body></html>

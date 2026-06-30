@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} — {{ site.company_name }}{% endblock %}
+{% block extrahead %}<style>
+.page-wrap{max-width:840px;margin:0 auto;padding:34px 24px 60px}
+.page-wrap h1{font-family:'Oswald';text-transform:uppercase;font-size:clamp(26px,3.4vw,38px);margin:8px 0 20px}
+.prose{font-size:16px;line-height:1.7;color:#3f3a32}
+.prose h2{font-family:'Oswald';text-transform:uppercase;font-size:22px;margin:26px 0 10px}
+.prose p{margin-bottom:14px}.prose ul{margin:0 0 14px 22px}.prose li{margin-bottom:6px}
+.prose a{color:var(--forest);font-weight:600}
+</style>{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="crumbs" style="font-size:13px;color:var(--ink-soft)"><a href="{% url 'content:home' %}">Главная</a> / {{ page.title }}</div>
+  <h1>{{ page.title }}</h1>
+  <div class="prose">{{ page.body|safe }}</div>
+</div>
+{% endblock %}

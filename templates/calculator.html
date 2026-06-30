@@ -1,0 +1,69 @@
+{% load l10n %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор пиломатериалов — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% load static %}<link rel="stylesheet" href="{% static 'css/calc.css' %}">
+</head>
+<body>
+<div class="top">
+  <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><div class="name">{{ site.company_name }}</div><div class="tag">калькулятор</div></span></a>
+  <a class="back" href="{% url 'content:home' %}">← На сайт</a>
+</div>
+<div class="shell">
+  <div class="head"><h1 style="font-family:'Oswald';text-transform:uppercase">Калькулятор пиломатериалов</h1><p>Объём и стоимость считаются на лету — в обе стороны: от количества к кубам, обратно и даже от бюджета.</p></div>
+  <div class="grid">
+    <div class="panel">
+      <h2>Параметры</h2>
+      <div class="f"><label>Выберите товар</label><div class="inp"><select id="mat">
+        <option value="" disabled selected>— выберите товар из каталога —</option>
+        {% for cat, items in calc_groups %}<optgroup label="{{ cat }}">{% for p in items %}<option data-t="{{ p.thickness }}" data-w="{{ p.width }}" data-l="{{ p.length }}" data-p="{{ p.price|unlocalize }}">{{ p.name }}</option>{% endfor %}</optgroup>{% endfor %}
+      </select></div></div>
+      <label>Размер одной единицы, мм (толщина × ширина × длина)</label>
+      <div class="three" style="margin-bottom:10px">
+        <div class="inp"><input id="t" class="num" type="number" value="25" min="1"><span class="u">мм</span></div>
+        <div class="inp"><input id="w" class="num" type="number" value="100" min="1"><span class="u">мм</span></div>
+        <div class="inp"><input id="l" class="num" type="number" value="6000" min="1"><span class="u">мм</span></div>
+      </div>
+      <div class="f"><label>Цена за кубометр</label><div class="inp"><input id="price" class="num" type="number" value="14500" min="0"><span class="u">₽ / м³</span></div></div>
+      <label>Количество / объём — введите любое из двух</label>
+      <div class="io">
+        <div class="inp"><input id="qty" class="num" type="number" value="50" min="0"><span class="u">шт</span></div>
+        <div class="inp"><input id="vol" class="num" type="number" value="0.75" min="0" step="0.001"><span class="u">м³</span></div>
+      </div>
+      <div class="note">Товары по м² или штучно считает менеджер — оставьте заявку, поможем.</div>
+    </div>
+    <div class="panel result">
+      <h2>Итог</h2>
+      <div class="big"><span class="lbl">Объём</span><span class="val"><span id="rVol" class="num">0,75</span><small>м³</small></span></div>
+      <div class="big"><span class="lbl">Стоимость</span><span class="val"><span id="rCost" class="num">10 875</span><small>₽</small></span></div>
+      <div class="divline"></div>
+      <div class="mini"><span>Количество</span><b class="num" id="rQty">50 шт</b></div>
+      <div class="mini"><span>Объём 1 шт</span><b class="num" id="rVpp">0,015 м³</b></div>
+      <div class="mini"><span>Цена за штуку</span><b class="num" id="rPpp">218 ₽</b></div>
+      <div class="divline"></div>
+      <label style="color:rgba(241,232,217,.82)">Задать бюджет</label>
+      <div class="inp" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)"><input id="cost" class="num" type="number" value="10875" min="0" style="color:#fff"><span class="u" style="color:rgba(241,232,217,.7)">₽</span></div>
+      <button class="cta" onclick="location.href='{% url 'orders:cart' %}'">Добавить в корзину</button>
+      <p class="note" style="color:rgba(241,232,217,.6)">Цена примерная. Точную с учётом доставки подтвердит менеджер.</p>
+    </div>
+  </div>
+</div>
+<script>
+var ru=function(n,d){return (isFinite(n)?n:0).toLocaleString('ru-RU',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});};
+var E=function(id){return document.getElementById(id);};
+var sel=E('mat');
+sel.addEventListener('change',function(){var o=sel.options[sel.selectedIndex];if(!o.dataset.t)return;E('t').value=o.dataset.t;E('w').value=o.dataset.w;E('l').value=o.dataset.l;E('price').value=o.dataset.p;recalc('dims');});
+function vpp(){return (+E('t').value*+E('w').value*+E('l').value)/1e9;}
+function recalc(src){var v=vpp(),price=+E('price').value,qty=+E('qty').value,vol=+E('vol').value,cost=+E('cost').value;
+ if(src==='qty'){vol=qty*v;cost=vol*price;}else if(src==='vol'){qty=v?vol/v:0;cost=vol*price;}else if(src==='cost'){vol=price?cost/price:0;qty=v?vol/v:0;}else{vol=qty*v;cost=vol*price;}
+ if(src!=='vol')E('vol').value=+vol.toFixed(3);if(src!=='qty')E('qty').value=Math.round(qty*100)/100;if(src!=='cost')E('cost').value=Math.round(cost);
+ E('rVol').textContent=ru(vol,3);E('rCost').textContent=ru(Math.round(cost));E('rQty').textContent=ru(Math.round(qty*100)/100)+' шт';E('rVpp').textContent=ru(v,3)+' м³';E('rPpp').textContent=ru(Math.round(v*price))+' ₽';}
+['t','w','l','price'].forEach(function(id){E(id).addEventListener('input',function(){sel.selectedIndex=0;recalc('dims')})});
+E('qty').addEventListener('input',function(){recalc('qty')});E('vol').addEventListener('input',function(){recalc('vol')});E('cost').addEventListener('input',function(){recalc('cost')});
+recalc('qty');
+</script>
+</body>
+</html>

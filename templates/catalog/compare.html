@@ -1,0 +1,40 @@
+{% load static humanize %}<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сравнение товаров — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#EFE6D5;--paper:#FBF7EF;--ink:#1B1A17;--ink-soft:#544E44;--forest:#274A36;--pine:#B97E3F;--line:#D6C8AC}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Manrope',sans-serif;background:var(--sand);color:var(--ink);padding:24px}
+.wrap{max-width:1100px;margin:0 auto}a{color:inherit;text-decoration:none}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.top a.back{color:var(--forest);font-weight:700}
+h1{font-family:'Oswald';text-transform:uppercase;font-size:30px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:14.5px}
+th{font-family:'Oswald';text-transform:uppercase;font-size:13px;color:var(--ink-soft);width:160px;background:rgba(39,74,54,.05)}
+td .ph{height:120px;border-radius:10px;background:linear-gradient(160deg,#caa06a,#9c7846);margin-bottom:10px}
+td .nm{font-weight:700}.price{font-family:'Oswald';font-size:20px}
+.empty{text-align:center;padding:60px;color:var(--ink-soft)}
+.btn{display:inline-block;background:var(--forest);color:#fff;border-radius:10px;padding:12px 22px;font-weight:700}
+</style></head><body>
+<div class="wrap">
+  <div class="top"><a class="back" href="{% url 'catalog:index' %}">← В каталог</a><a href="#" onclick="localStorage.removeItem('lpb_compare');location.reload();return false" style="color:#9a3b2e">Очистить сравнение</a></div>
+  <h1>Сравнение товаров</h1>
+  {% if products %}
+  <div style="overflow-x:auto"><table>
+    <tr><th>Товар</th>{% for p in products %}<td><a href="{{ p.get_absolute_url }}"><div class="ph"></div><div class="nm">{{ p.name }}</div></a></td>{% endfor %}</tr>
+    <tr><th>Цена</th>{% for p in products %}<td><span class="price">{{ p.price|floatformat:0|intcomma }}</span> {{ p.get_unit_display }}</td>{% endfor %}</tr>
+    <tr><th>Размер</th>{% for p in products %}<td class="num">{{ p.dimensions }} мм</td>{% endfor %}</tr>
+    <tr><th>Порода</th>{% for p in products %}<td>{{ p.get_species_display }}</td>{% endfor %}</tr>
+    <tr><th>Сорт</th>{% for p in products %}<td>{{ p.grade|default:"—" }}</td>{% endfor %}</tr>
+    <tr><th>Стандарт</th>{% for p in products %}<td>{{ p.standard|default:"—" }}</td>{% endfor %}</tr>
+    <tr><th>Наличие</th>{% for p in products %}<td>{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</td>{% endfor %}</tr>
+    <tr><th></th>{% for p in products %}<td><a class="btn" href="{{ p.get_absolute_url }}">Открыть</a></td>{% endfor %}</tr>
+  </table></div>
+  {% else %}
+  <div class="empty">Вы пока не добавили товары к сравнению. Нажмите значок «⇄» на карточках товаров.<br><br><a class="btn" href="{% url 'catalog:index' %}">Перейти в каталог</a></div>
+  {% endif %}
+</div>
+</body></html>

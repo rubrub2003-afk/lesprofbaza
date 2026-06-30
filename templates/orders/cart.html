@@ -1,0 +1,97 @@
+{% load static humanize l10n %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Корзина — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+</head>
+<body>
+<div class="topbar"><div class="wrap"><span>Москва и Московская область · доставка круглосуточно</span><span><a href="{% url 'content:page' 'kontakty' %}">Контакты</a></span></div></div>
+<header class="head"><div class="wrap">
+  <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">корзина-заявка</span></span></a>
+  <div class="head-actions"><a class="iconbtn" href="{% url 'orders:account' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a></div>
+</div></header>
+
+{% if success %}
+<div class="wrap"><div class="ok" style="display:block">
+  <div class="ic"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg></div>
+  <h2>Заявка отправлена!</h2>
+  <p>Спасибо! Заявка №{{ order.pk }} принята. Менеджер свяжется с вами, подтвердит состав и посчитает доставку. Оплата онлайн не списывается.</p>
+  <button class="btn" style="max-width:260px;margin:22px auto 0" onclick="location.href='{% url 'content:home' %}'">Вернуться на сайт</button>
+</div></div>
+{% elif not items %}
+<div class="wrap"><div style="text-align:center;padding:70px 20px">
+  <h1 class="page" style="font-size:30px">Корзина пуста</h1>
+  <p style="color:var(--ink-soft);margin-bottom:20px">Загляните в каталог — там 111 позиций.</p>
+  <a class="btn" style="display:inline-block;max-width:260px;text-align:center;line-height:54px;text-decoration:none" href="{% url 'catalog:index' %}">Перейти в каталог</a>
+</div></div>
+{% else %}
+<div class="wrap" id="cartView">
+  <div style="padding:16px 0 0"><a class="back" href="{% url 'content:home' %}">← На сайт</a></div>
+  <div class="steps"><span class="on">1 Корзина</span> <span>—</span> <b>2 Оформление</b> <span>—</span> <span>3 Готово</span></div>
+  <h1 class="page">Ваша заявка</h1>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="checkout">
+  <div class="layout">
+    <div>
+      <div class="card">
+        <h3>Товары в заявке</h3>
+        <div id="items">
+          {% for it in items %}
+          <div class="item" data-price="{{ it.product.price|unlocalize }}">
+            <div class="ph"></div>
+            <div><div class="nm">{{ it.product.name }}</div><div class="dm num">{{ it.product.dimensions }}{% if it.product.standard %} · {{ it.product.standard }}{% endif %}</div><div class="up num">{{ it.product.price|floatformat:0|intcomma }} {{ it.product.get_unit_display }}</div></div>
+            <div class="right"><div class="qty"><button type="button" onclick="step(this,-1)">−</button><input class="num q" name="qty_{{ it.product.slug }}" value="{{ it.qty }}"><button type="button" onclick="step(this,1)">+</button></div><div class="lt num">{{ it.line_total|intcomma }} ₽</div><a class="rm" href="{% url 'orders:remove' it.product.slug %}">Удалить</a></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <h3>Получение</h3>
+        <div class="recv">
+          <label class="opt on" id="opt-pickup"><input type="radio" name="receive" value="pickup" checked hidden onclick="recv('pickup')"><b>Самовывоз</b><small>С нашей точки, бесплатно. Адрес пришлём в подтверждении.</small></label>
+          <label class="opt" id="opt-delivery"><input type="radio" name="receive" value="delivery" hidden onclick="recv('delivery')"><b>Доставка</b><small>По Москве и области. Стоимость рассчитает менеджер.</small></label>
+        </div>
+        <div id="addr" class="f" style="display:none"><label class="l">Адрес доставки</label><input class="t" name="address" placeholder="Город, улица, дом"></div>
+      </div>
+      <div class="card">
+        <h3>Контакты</h3>
+        <div class="frow"><div class="f"><label class="l">Имя</label><input class="t" name="name" placeholder="Как к вам обращаться" required></div><div class="f"><label class="l">Телефон</label><input class="t" type="tel" name="phone" placeholder="+7 (___) ___-__-__" required></div></div>
+        <div class="f"><label class="l">Комментарий к заказу</label><textarea class="t" name="comment" placeholder="Сроки, нюансы, вопросы по сорту/распилу…"></textarea></div>
+        <label class="check"><input type="checkbox" checked required> Согласен на обработку персональных данных и принимаю <a href="{% url 'content:page' 'politika' %}">политику конфиденциальности</a></label>
+      </div>
+    </div>
+    <div class="card summary">
+      <h3>Итого по заявке</h3>
+      <div class="sum-row"><span>Позиций</span><b id="sCnt">{{ items|length }}</b></div>
+      <div class="sum-row"><span>Товаров, шт</span><b class="num" id="sQty">0</b></div>
+      <div class="sum-row"><span>Доставка</span><span id="sDeliv">самовывоз</span></div>
+      <div class="sum-total"><span style="font-family:'Oswald';text-transform:uppercase;font-size:14px">К оплате*</span><b class="num" id="sTotal">{{ total|intcomma }} ₽</b></div>
+      <button class="btn" type="submit">Отправить заявку</button>
+      <p class="muted">* Предварительно. Оплата не списывается онлайн — менеджер подтвердит состав, посчитает доставку и свяжется с вами. Можно оплатить после доставки.</p>
+    </div>
+  </div>
+  </form>
+</div>
+{% endif %}
+
+<footer><div class="wrap"><span>© 2026 {{ site.company_name }} · Москва и МО</span><span><a href="{% url 'content:home' %}">На главную</a></span></div></footer>
+
+<script>
+function fmt(n){return Math.round(n).toLocaleString('ru-RU');}
+function recalc(){
+  var items=[].slice.call(document.querySelectorAll('#items .item')), total=0, qty=0;
+  items.forEach(function(it){var price=+it.dataset.price,q=Math.max(0,parseInt(it.querySelector('.q').value)||0);var lt=price*q;it.querySelector('.lt').textContent=fmt(lt)+' ₽';total+=lt;qty+=q;});
+  var c=document.getElementById('sCnt'); if(c)c.textContent=items.length;
+  var sq=document.getElementById('sQty'); if(sq)sq.textContent=qty.toLocaleString('ru-RU');
+  var st=document.getElementById('sTotal'); if(st)st.textContent=fmt(total)+' ₽';
+}
+function step(btn,d){var i=btn.parentNode.querySelector('.q');i.value=Math.max(1,(parseInt(i.value)||0)+d);recalc();}
+document.querySelectorAll('.q').forEach(function(i){i.addEventListener('input',recalc)});
+function recv(w){document.getElementById('opt-pickup').classList.toggle('on',w==='pickup');document.getElementById('opt-delivery').classList.toggle('on',w==='delivery');document.getElementById('addr').style.display=w==='delivery'?'block':'none';document.getElementById('sDeliv').textContent=w==='delivery'?'рассчитает менеджер':'самовывоз';}
+recalc();
+</script>
+<script src="{% static 'js/site.js' %}"></script>
+</body>
+</html>

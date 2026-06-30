@@ -1,0 +1,29 @@
+# Конфигурация деплоя на Render (render.com)
+databases:
+  - name: lesprofbaza-db
+    plan: free
+    databaseName: lesprofbaza
+    user: lesprofbaza
+
+services:
+  - type: web
+    name: lesprofbaza
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi --log-file -"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lesprofbaza-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://lesprofbaza.onrender.com"

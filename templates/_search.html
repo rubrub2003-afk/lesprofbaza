@@ -1,0 +1,23 @@
+{{ search_cats|json_script:"sCats" }}{{ search_items|json_script:"sItems" }}
+<script>
+(function(){
+  var inp=document.getElementById('searchInput'),box=document.getElementById('suggest');
+  if(!inp||!box)return;
+  var CATS=JSON.parse(document.getElementById('sCats').textContent);
+  var ITEMS=JSON.parse(document.getElementById('sItems').textContent);
+  function starts(name,q){return name.toLowerCase().split(/[\s,×х\/()\-–]+/).some(function(w){return w.length&&w.indexOf(q)===0;});}
+  function render(){
+    var q=inp.value.trim().toLowerCase();
+    if(!q){box.classList.remove('show');box.innerHTML='';return;}
+    var cm=CATS.filter(function(c){return starts(c.n,q);});
+    var pm=ITEMS.filter(function(p){return starts(p.n,q);}).slice(0,6);
+    var html=cm.map(function(c){return '<a class="catrow" href="'+c.u+'"><span>'+c.n+'</span><span class="pr">раздел →</span></a>';}).join('');
+    html+=pm.map(function(p){return '<a href="'+p.u+'"><span>'+p.n+'</span><span class="pr">'+p.p+'</span></a>';}).join('');
+    if(!html)html='<div class="empty">Ничего не найдено — напишите менеджеру, поможем подобрать</div>';
+    box.innerHTML=html;box.classList.add('show');
+  }
+  inp.addEventListener('input',render);
+  inp.addEventListener('focus',function(){if(inp.value)render();});
+  document.addEventListener('click',function(e){if(!e.target.closest('.search'))box.classList.remove('show');});
+})();
+</script>

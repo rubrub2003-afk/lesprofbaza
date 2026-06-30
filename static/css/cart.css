@@ -1,0 +1,64 @@
+:root{--sand:#EFE6D5;--sand-deep:#E5D9C2;--paper:#FBF7EF;--ink:#1B1A17;--ink-soft:#544E44;--forest:#274A36;--forest-2:#326049;--pine:#B97E3F;--pine-2:#CE9352;--line:#D6C8AC;--radius:14px;--shadow:0 10px 30px rgba(27,26,23,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:var(--sand);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.01em;text-transform:uppercase}
+.num{font-variant-numeric:tabular-nums}a{color:inherit;text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.topbar{background:var(--ink);color:#EFE6D5;font-size:13px}.topbar .wrap{display:flex;justify-content:space-between;align-items:center;height:38px}
+header.head{background:rgba(239,230,213,.94);border-bottom:1px solid var(--line)}
+.head .wrap{display:flex;align-items:center;gap:20px;height:74px}
+.logo{display:flex;align-items:center;gap:11px}.logo .mark{width:42px;height:42px}
+.logo .name{font-family:'Oswald';font-weight:700;font-size:21px;display:block}.logo .tag{font-size:10px;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:2px}
+.head-actions{margin-left:auto;display:flex;align-items:center;gap:12px}
+.back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}
+.iconbtn{width:46px;height:46px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--ink)}.iconbtn svg{width:21px;height:21px}
+/* шаги */
+.steps{display:flex;gap:10px;align-items:center;padding:22px 0 6px;font-family:'Oswald';text-transform:uppercase;font-size:13px;letter-spacing:.06em;color:var(--ink-soft)}
+.steps b{color:var(--ink)}.steps .on{color:var(--forest)}.steps span{color:var(--line)}
+h1.page{font-size:clamp(26px,3.4vw,38px);margin:6px 0 22px}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:26px;padding-bottom:60px;align-items:start}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px}
+.card h3{font-size:17px;margin-bottom:16px}
+/* позиции */
+.item{display:grid;grid-template-columns:78px 1fr auto;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .ph{width:78px;height:64px;border-radius:10px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
+.item .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 12px)}
+.item .nm{font-weight:700;font-size:15px}
+.item .dm{font-family:'Oswald';color:var(--ink-soft);font-size:12px;letter-spacing:.06em;margin-top:2px}
+.item .up{color:var(--ink-soft);font-size:13px;margin-top:4px}
+.item .right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.qty{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:9px;background:#fff;overflow:hidden}
+.qty button{width:34px;height:38px;border:0;background:transparent;font-size:17px;cursor:pointer;color:var(--ink-soft)}.qty button:hover{background:var(--sand);color:var(--ink)}
+.qty input{width:48px;height:38px;border:0;text-align:center;font-family:inherit;font-size:15px;outline:none}
+.item .lt{font-family:'Oswald';font-size:18px}
+.rm{background:none;border:0;color:#9a3b2e;font-size:12.5px;cursor:pointer}.rm:hover{text-decoration:underline}
+/* форма */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label.l{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:0 0 6px 2px}
+.f{margin-bottom:14px}
+input.t,textarea.t,select.t{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;height:48px;font-family:inherit;font-size:15px;background:#fff;outline:none}
+textarea.t{height:88px;padding:12px 14px;resize:vertical}
+input.t:focus,textarea.t:focus{border-color:var(--forest);box-shadow:0 0 0 4px rgba(39,74,54,.1)}
+.recv{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.opt{border:1.5px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;background:#fff;transition:border-color .2s,background .2s}
+.opt.on{border-color:var(--forest);background:rgba(39,74,54,.05)}
+.opt b{font-family:'Oswald';text-transform:uppercase;font-size:14px;display:block}.opt small{color:var(--ink-soft);font-size:12.5px}
+.check{display:flex;gap:10px;font-size:12.5px;color:var(--ink-soft);line-height:1.4;margin-top:6px}
+.check input{margin-top:2px;accent-color:var(--forest);width:16px;height:16px;flex-shrink:0}.check a{color:var(--forest)}
+/* сводка */
+.summary{position:sticky;top:18px}
+.sum-row{display:flex;justify-content:space-between;font-size:14px;margin:10px 0;color:var(--ink-soft)}
+.sum-row b{color:var(--ink);font-family:'Oswald';font-size:16px}
+.sum-total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.sum-total b{font-family:'Oswald';font-size:30px}
+.btn{display:block;width:100%;text-align:center;border:0;border-radius:12px;height:54px;font-weight:700;font-size:15.5px;cursor:pointer;background:var(--pine);color:#fff;transition:background .2s,transform .15s;margin-top:14px;font-family:inherit}
+.btn:hover{background:var(--pine-2);transform:translateY(-1px)}
+.muted{font-size:12px;color:#8a7c66;margin-top:12px;line-height:1.45}
+.ok{display:none;text-align:center;padding:50px 20px}
+.ok .ic{width:74px;height:74px;border-radius:999px;background:var(--forest);display:grid;place-items:center;margin:0 auto 18px}
+.ok h2{font-size:26px;margin-bottom:8px}.ok p{color:var(--ink-soft);max-width:30em;margin:0 auto}
+@media(max-width:880px){.layout{grid-template-columns:1fr}.summary{position:static}.frow,.recv{grid-template-columns:1fr}}
+footer{background:#15140F;color:rgba(239,230,213,.7);padding:26px 0;font-size:13px;margin-top:10px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+footer a:hover{color:var(--pine-2)}

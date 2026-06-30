@@ -1,0 +1,15 @@
+# Зависимости проекта ЛЕСПРОФБАЗА
+Django>=5.0,<5.1
+Pillow            # обработка изображений товаров
+openpyxl          # импорт прайса из Excel
+python-dotenv     # переменные окружения (.env)
+
+# Для боевого сервера (PostgreSQL) — раскомментировать при деплое:
+# psycopg2-binary
+# gunicorn
+
+# --- Боевой сервер (деплой) ---
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary

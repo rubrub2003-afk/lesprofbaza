@@ -1,0 +1,106 @@
+{% load static humanize l10n %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}">
+<style>.search{position:relative}.suggest{position:absolute;top:50px;left:0;right:0;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:none;z-index:60}.suggest.show{display:block}.suggest a{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;font-size:14px;border-bottom:1px solid var(--line)}.suggest a:last-child{border-bottom:0}.suggest a:hover{background:var(--sand)}.suggest .pr{color:var(--ink-soft);font-size:12.5px;white-space:nowrap}.suggest a.catrow{background:rgba(39,74,54,.06)}.suggest a.catrow .pr{color:var(--forest);font-weight:700}.suggest .empty{padding:12px 16px;color:var(--ink-soft);font-size:13.5px}.back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}.cmp.on{background:var(--forest)!important;color:#fff!important}.card.cmp-selected{outline:2px solid var(--forest);outline-offset:-2px}</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap"><span>Москва и Московская область · доставка круглосуточно</span><span><a href="{% url 'content:page' 'dostavka-i-oplata' %}">Доставка и оплата</a> · <a href="{% url 'content:page' 'dlya-yurlic' %}">Для юрлиц</a> · <a href="{% url 'content:page' 'kontakty' %}">Контакты</a></span></div></div>
+<header class="head"><div class="wrap">
+  <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">пиломатериалы · Москва и МО</span></span></a>
+  <form class="search" onsubmit="return false" autocomplete="off"><input id="searchInput" type="text" placeholder="Поиск: доска, брус, вагонка…"><button><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><div class="suggest" id="suggest"></div></form>
+  <div class="head-actions">
+    <a class="iconbtn" href="{% url 'orders:account' %}" title="Кабинет"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+    <a class="iconbtn cart" href="{% url 'orders:cart' %}" title="Корзина"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h2l2.5 12h9L21 8H7"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17.5" cy="20" r="1.4"/></svg><span>{{ cart_count }}</span></a>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="crumbs"><a href="{% url 'content:home' %}">Главная</a> / {% if current_category %}<a href="{% url 'catalog:index' %}">Каталог</a> / {{ current_category.name }}{% else %}Каталог{% endif %}</div>
+  <div class="page-h"><h1>{{ title }}</h1><span class="cnt" id="cnt">Показано {{ products|length }} из {{ products|length }}</span></div>
+
+  <div class="layout">
+    <aside class="filters">
+      <div class="fg"><h4>Категории</h4>
+        {% for g in catalog_groups %}<label class="chk"><input type="checkbox" class="fcat" value="{{ g.slug }}">{{ g.name }}</label>{% endfor %}
+      </div>
+      <div class="fg"><h4>Наличие</h4>
+        <label class="chk"><input type="checkbox" class="fstock" value="in">В наличии</label>
+        <label class="chk"><input type="checkbox" class="fstock" value="order">Под заказ</label>
+      </div>
+      <div class="fg"><h4>Цена, ₽</h4>
+        <div class="price-row"><input id="pmin" type="number" placeholder="от" class="num"><span>—</span><input id="pmax" type="number" placeholder="до" class="num"></div>
+      </div>
+      <button class="reset" onclick="resetF()">Сбросить фильтры</button>
+    </aside>
+
+    <div>
+      <div class="toolbar">
+        <div class="sortsel">Сортировка:
+          <select id="sort" onchange="applyF()"><option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option></select>
+        </div>
+        <span class="eyebrow">7 разделов · {{ products|length }} позиций</span>
+      </div>
+
+      <div class="prods" id="prods">
+        {% for p in products %}
+        <article class="card" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}">
+          <div class="ph">
+            <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
+            <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
+            <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" onclick="fav(this)" title="В избранное">♡</div>
+          </div>
+          <div class="body">
+            <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>
+            <h3>{{ p.name }}</h3>
+            <div class="meta">{{ p.get_species_display }}{% if p.grade %} · {{ p.grade }}{% endif %}</div>
+            <div class="price">{% if p.old_price %}<span class="old num">{{ p.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ p.price|floatformat:0|intcomma }}</b><span class="unit">{{ p.get_unit_display }}</span></div>
+            <div class="actions"><a class="btn btn-forest" href="{{ p.get_absolute_url }}">В корзину</a><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый</a></div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cmpbar" id="cmpbar"><div class="wrap"><b>К сравнению выбрано: <span id="cmpn">0</span></b><a id="cmpgo" href="#" style="background:var(--pine);color:#fff;border-radius:999px;padding:11px 22px;font-weight:700;text-decoration:none">Сравнить товары →</a></div></div>
+<footer><div class="wrap"><span>© 2026 {{ site.company_name }} · Москва и МО</span><span><a href="{% url 'content:home' %}">На главную</a></span></div></footer>
+
+<script>
+var cards=[].slice.call(document.querySelectorAll('#prods .card'));
+function applyF(){
+  var cats=[].slice.call(document.querySelectorAll('.fcat:checked')).map(function(c){return c.value});
+  var stocks=[].slice.call(document.querySelectorAll('.fstock:checked')).map(function(c){return c.value});
+  var pmin=parseFloat(document.getElementById('pmin').value)||0;
+  var pmax=parseFloat(document.getElementById('pmax').value)||1e12;
+  var shown=0;
+  cards.forEach(function(c){
+    var ok=(!cats.length||cats.indexOf(c.dataset.cat)>-1)&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
+    c.style.display=ok?'':'none'; if(ok)shown++;
+  });
+  var s=document.getElementById('sort').value, box=document.getElementById('prods');
+  var vis=cards.filter(function(c){return c.style.display!=='none'});
+  if(s==='asc') vis.sort(function(a,b){return a.dataset.price-b.dataset.price;});
+  else if(s==='desc') vis.sort(function(a,b){return b.dataset.price-a.dataset.price;});
+  else vis.sort(function(a,b){return (b.dataset.pop-a.dataset.pop);});
+  vis.forEach(function(c){box.appendChild(c)});
+  document.getElementById('cnt').textContent='Показано '+shown+' из '+cards.length;
+  var e=box.querySelector('.empty'); if(e)e.remove();
+  if(!shown){var d=document.createElement('div');d.className='empty';d.textContent='Ничего не найдено. Сбросьте фильтры или напишите менеджеру — поможем подобрать.';box.appendChild(d);}
+}
+document.querySelectorAll('.fcat,.fstock').forEach(function(c){c.addEventListener('change',applyF)});
+document.getElementById('pmin').addEventListener('input',applyF);document.getElementById('pmax').addEventListener('input',applyF);
+function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.getElementById('sort').value='pop';applyF();}
+function fav(el){var on=el.textContent==='♥';el.textContent=on?'♡':'♥';el.style.color=on?'':'#B97E3F';}
+(function(){var cat=new URLSearchParams(location.search).get("cat");if(cat){var cb=document.querySelector('.fcat[value="'+cat+'"]');if(cb)cb.checked=true;}applyF();})();
+
+</script>
+{% include '_search.html' %}
+<script src="{% static 'js/compare.js' %}"></script>
+</body>
+</html>

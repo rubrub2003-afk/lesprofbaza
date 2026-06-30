@@ -1,0 +1,144 @@
+{% extends "base.html" %}{% load humanize %}
+{% block content %}
+<section class="hero" style="padding-top:0">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="slogan">{{ site.slogan }}</span>
+      <h1>Пиломатериалы <span class="accent">для стройки и отделки</span> в Москве и области</h1>
+      <p class="lead">Доска, брус, вагонка, погонаж и мебельный щит. Доставим по Москве и области или заберёте сами — поможем подобрать материал и рассчитать объём и цену под ваш заказ.</p>
+      <div class="hero-cta">
+        <a class="btn btn-forest" href="{% url 'catalog:index' %}">Смотреть каталог</a>
+        <a class="btn btn-ghost" href="{% url 'content:calculator' %}">Рассчитать объём</a>
+      </div>
+    </div>
+    <div class="hero-photo reveal" aria-hidden="true">
+      <span class="cap"><b>Фото вашей продукции</b>Сюда поставим реальное фото ассортимента или процесса {{ site.company_name }}</span>
+    </div>
+  </div>
+</section>
+
+<div class="ruler"></div>
+
+<section id="catalog">
+  <div class="wrap">
+    <div class="sec-head reveal"><div><span class="eyebrow">Каталог</span><h2>{{ catalog_groups|length }} разделов ассортимента</h2></div><a class="link" href="{% url 'catalog:index' %}">Весь каталог →</a></div>
+    <div class="cats">
+      {% for g in catalog_groups %}
+      <a class="cat reveal" href="{% url 'catalog:index' %}?cat={{ g.slug }}">
+        {% if g.image %}<div class="thumb" style="background-image:url({{ g.image.url }});background-size:cover"></div>{% else %}<div class="thumb"></div>{% endif %}
+        <div class="c-body"><b>{{ g.name }}</b><small>{% if g.description %}{{ g.description }}{% else %}{% for c in g.children.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</small></div>
+      </a>
+      {% endfor %}
+      <a class="cat search-tile reveal" href="{% url 'catalog:index' %}"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><b>Не знаете, что нужно?</b><small>Напишите свои пожелания — мы поможем подобрать</small></a>
+    </div>
+  </div>
+</section>
+
+<div class="ruler"></div>
+
+{% if popular_products %}
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal"><div><span class="eyebrow">Сейчас покупают</span><h2>Популярное</h2></div><a class="link" href="{% url 'catalog:index' %}">Смотреть всё →</a></div>
+    <div class="prods">
+      {% for p in popular_products %}
+      <article class="card reveal">
+        <div class="ph">
+          <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
+          <span class="stock">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
+          <div class="cmp" title="Сравнить">⇄</div><div class="fav" title="В избранное">♡</div>
+        </div>
+        <div class="body">
+          <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>
+          <h3>{{ p.name }}</h3>
+          <div class="meta">{{ p.get_species_display }}{% if p.grade %} · {{ p.grade }}{% endif %}</div>
+          <div class="price">{% if p.old_price %}<span class="old num">{{ p.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ p.price|floatformat:0|intcomma }}</b><span class="unit">{{ p.get_unit_display }}</span>{% if p.discount %}<span class="off">−{{ p.discount }}%</span>{% endif %}</div>
+          {% if p.price_per_piece %}<div class="hint">≈ {{ p.price_per_piece|intcomma }} ₽ за штуку</div>{% endif %}
+          <div class="actions"><a class="btn btn-forest" href="{{ p.get_absolute_url }}">В корзину</a><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый заказ</a></div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="calc" id="calc">
+  <div class="wrap"><div class="box reveal">
+    <div><span class="eyebrow">Калькулятор</span><h2>Посчитайте объём и стоимость онлайн</h2><p>Введите размеры и количество — объём и цена пересчитываются сразу. Расчёт в обе стороны.</p></div>
+    <a class="btn btn-pine btn-glow" href="{% url 'content:calculator' %}" style="padding:15px 26px;font-size:15px">Открыть калькулятор</a>
+  </div></div>
+</section>
+
+<section class="why">
+  <div class="wrap">
+    <div class="reveal"><span class="eyebrow">Почему {{ site.company_name }}</span><h2>Работаем так, чтобы вы вернулись</h2></div>
+    <div class="adv">
+      <div class="item reveal"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 13h13V6H3zM16 9h4l1 4v3h-5z"/><circle cx="6.5" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg><b>Доставка и самовывоз</b><small>Самовывоз из магазина или доставка по Москве и области в удобное время.</small></div>
+      <div class="item reveal"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M5 8l7-5 7 5M5 8v8l7 5 7-5V8"/></svg><b>Подбор под задачу</b><small>Поможем выбрать материал, сорт и размер под стройку, отделку или ремонт.</small></div>
+      <div class="item reveal"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l3 6 6 .9-4.5 4.2 1 6-5.5-3-5.5 3 1-6L3 8.9 9 8z"/></svg><b>Качество древесины</b><small>Сосна, ель и липа по ГОСТ и ТУ. Проверяем партию перед отгрузкой.</small></div>
+      <div class="item reveal"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><b>Удобная оплата</b><small>Наличными, картой или по счёту для организаций. Частным — можно после доставки.</small></div>
+      <div class="item reveal"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5M4 12h9l-2-3 2-3H4"/></svg><b>Цена без сюрпризов</b><small>Считаем кубатуру и стоимость заранее — в заказе ровно то, о чём договорились.</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="trust">
+  <div class="wrap">
+    <div class="sec-head reveal" style="justify-content:center;text-align:center;flex-direction:column;gap:6px"><span class="eyebrow">Почему нам доверяют</span><h2>Доверие, а не обещания</h2></div>
+    <div class="counts">
+      <div class="count reveal"><b class="count-up" data-to="12">12</b><small>лет на рынке пиломатериалов</small></div>
+      <div class="count reveal"><b class="count-up" data-to="6000" data-suf="+">6 000+</b><small>выполненных заказов</small></div>
+      <div class="count reveal"><b class="count-up" data-to="10000" data-suf=" м³">10 000 м³</b><small>древесины отгружено</small></div>
+      <div class="count reveal"><b class="count-up" data-to="98" data-suf="%">98%</b><small>клиентов возвращаются снова</small></div>
+    </div>
+    <div class="guar">
+      <div class="g reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7l9-4 9 4v6c0 5-4 8-9 9-5-1-9-4-9-9z"/><path d="M9 12l2 2 4-4"/></svg><div><b>Обмен и возврат</b><small>Если товар не подошёл или есть вопрос к качеству — поменяем или вернём деньги.</small></div></div>
+      <div class="g reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><div><b>Проверка перед отгрузкой</b><small>Каждую партию осматриваем до погрузки — без скрытых дефектов и пересортицы.</small></div></div>
+      <div class="g reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><div><b>Документы и гарантия</b><small>Полный пакет документов для частных лиц и организаций, работаем официально.</small></div></div>
+    </div>
+  </div>
+</section>
+
+{% if faqs %}
+<section style="background:var(--sand-deep)">
+  <div class="wrap">
+    <div class="sec-head reveal" style="justify-content:center;text-align:center;flex-direction:column;gap:6px"><span class="eyebrow">Частые вопросы</span><h2>Коротко о главном</h2></div>
+    <div class="faq">
+      {% for f in faqs %}<details class="q reveal"><summary>{{ f.question }}<span class="chev"></span></summary><div class="a">{{ f.answer|linebreaksbr }}</div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="map">
+  <div class="wrap"><div class="box reveal">
+    <div class="info">
+      <span class="eyebrow">Как нас найти</span><h2>Самовывоз и контакты</h2>
+      <div class="row"><b>Адрес</b>{{ site.address|default:"Москва, [адрес точки самовывоза]" }}</div>
+      <div class="row"><b>Часы работы</b>{{ site.hours|default:"Ежедневно, 8:00–20:00" }}</div>
+      <div class="row"><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span></div>
+      <a class="btn btn-forest" href="{{ site.yandex_maps_url|default:'https://yandex.ru/maps' }}" target="_blank" rel="noopener" style="margin-top:8px">Открыть в Яндекс.Картах</a>
+    </div>
+    {% if site.map_embed %}{{ site.map_embed|safe }}{% else %}<iframe title="Карта" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=37.58%2C55.74%2C37.68%2C55.78&layer=mapnik&marker=55.76%2C37.63"></iframe>{% endif %}
+  </div></div>
+</section>
+
+<section class="delivery"><div class="wrap">
+  <div class="reveal"><h2>Доставка по Москве и Московской области</h2><p>Своим транспортом, круглосуточно (24/7). Возможен и самовывоз.</p></div>
+  <a class="btn btn-pine reveal" href="{% url 'content:page' 'dostavka-i-oplata' %}" style="padding:15px 26px;font-size:15px">Условия доставки</a>
+</div></section>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!reduce){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+  function animateCount(el){var to=+el.dataset.to,suf=el.dataset.suf||'',t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1400,1);el.textContent=Math.floor((1-Math.pow(1-p,3))*to).toLocaleString('ru-RU')+suf;if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+  var cio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){animateCount(e.target);cio.unobserve(e.target);}});},{threshold:.5});
+  document.querySelectorAll('.count-up').forEach(function(el){cio.observe(el)});
+} else { document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')}); }
+</script>
+{% endblock %}

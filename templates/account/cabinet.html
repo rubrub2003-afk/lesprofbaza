@@ -1,0 +1,62 @@
+{% load static humanize %}<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Личный кабинет — {{ site.company_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#EFE6D5;--sand-deep:#E5D9C2;--paper:#FBF7EF;--ink:#1B1A17;--ink-soft:#544E44;--forest:#274A36;--pine:#B97E3F;--line:#D6C8AC;--shadow:0 10px 30px rgba(27,26,23,.1)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Manrope',sans-serif;background:var(--sand);color:var(--ink)}a{color:inherit;text-decoration:none}
+.top{max-width:1000px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:11px}.logo .name{font-family:'Oswald';font-weight:700;font-size:21px}.logo .tag{font-size:10px;color:var(--ink-soft);text-transform:uppercase;margin-top:2px}
+.top .right{display:flex;gap:16px;align-items:center}.top a.lnk{color:var(--forest);font-weight:700;font-size:14px}.top a.out{color:#9a3b2e;font-weight:700;font-size:14px}
+.shell{max-width:1000px;margin:0 auto 60px;padding:0 24px}
+h1{font-family:'Oswald';text-transform:uppercase;font-size:clamp(26px,3.4vw,36px);margin:10px 0 6px}.sub{color:var(--ink-soft);margin-bottom:24px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h2{font-family:'Oswald';text-transform:uppercase;font-size:17px;margin-bottom:14px}
+.badge{display:inline-block;font-family:'Oswald';text-transform:uppercase;font-size:12px;padding:4px 10px;border-radius:6px;color:#fff}
+.b-new{background:var(--pine)}.b-work{background:var(--forest)}.b-done{background:#3a3733}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}.row:last-child{border-bottom:0}
+table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{font-family:'Oswald';text-transform:uppercase;font-size:12px;color:var(--ink-soft)}
+.empty{color:var(--ink-soft);text-align:center;padding:30px}
+.cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:6px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}.tile b{font-family:'Oswald';display:block;font-size:15px;margin-bottom:4px}.tile small{color:var(--ink-soft);font-size:12.5px}
+@media(max-width:700px){.cols{grid-template-columns:1fr}}
+</style></head><body>
+<div class="top">
+  <a class="logo" href="{% url 'content:home' %}"><img style="width:auto;height:46px" src="{% static 'img/emblem.png' %}" alt=""><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
+  <div class="right"><a class="lnk" href="{% url 'content:home' %}">← На сайт</a><a class="out" href="{% url 'orders:logout' %}">Выйти</a></div>
+</div>
+<div class="shell">
+  <h1>Здравствуйте{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</h1>
+  <p class="sub">Здесь — статус заказа, история и избранное.</p>
+
+  {% if active %}
+  <div class="card">
+    <h2>Активный заказ №{{ active.pk }}</h2>
+    <div class="row"><span>Статус</span><span class="badge {% if active.status == 'new' %}b-new{% elif active.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ active.get_status_display }}</span></div>
+    <div class="row"><span>Получение</span><span>{{ active.get_receive_display }}</span></div>
+    <div class="row"><span>Сумма (предв.)</span><b class="num">{{ active.total|floatformat:0|intcomma }} ₽</b></div>
+    <div class="row"><span>Создан</span><span>{{ active.created|date:"d.m.Y H:i" }}</span></div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>История заказов</h2>
+    {% if orders %}
+    <table><tr><th>№</th><th>Дата</th><th>Получение</th><th>Сумма</th><th>Статус</th></tr>
+      {% for o in orders %}<tr><td>{{ o.pk }}</td><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td></tr>{% endfor %}
+    </table>
+    {% else %}<div class="empty">Заказов пока нет. <a href="{% url 'catalog:index' %}" style="color:var(--forest);font-weight:700">Перейти в каталог →</a></div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Преимущества кабинета</h2>
+    <div class="cols">
+      <div class="tile"><b>Статус заказа</b><small>Видите, на каком этапе ваш заказ.</small></div>
+      <div class="tile"><b>История</b><small>Все прошлые заказы и быстрый повтор.</small></div>
+      <div class="tile"><b>Избранное</b><small>Сохранённые товары на любом устройстве.</small></div>
+    </div>
+  </div>
+</div>
+</body></html>
