@@ -48,6 +48,15 @@
     last={{ admin_new_orders|default:0 }}+{{ admin_new_leads|default:0 }};
     applyDots({{ admin_new_orders|default:0 }},{{ admin_new_leads|default:0 }});
     setInterval(poll, 20000);
+    var ram=document.getElementById('recent-actions-module');
+    if(ram){var h=ram.querySelector('h2,h3');
+      if(h && !h.querySelector('.lpb-clear')){
+        var cl=document.createElement('a');cl.href='/staff/clear-actions/';cl.textContent='Очистить';cl.className='lpb-clear';
+        cl.style.cssText='float:right;font-size:12px;font-weight:400;color:#d23b2e';
+        cl.onclick=function(e){if(!confirm('Очистить список последних действий?'))e.preventDefault();};
+        h.appendChild(cl);
+      }
+    }
   });
 })();
 </script>

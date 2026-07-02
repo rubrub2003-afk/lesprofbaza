@@ -61,8 +61,12 @@ def search(request):
     if not q:
         return JsonResponse({"categories": [], "products": []})
 
+    tokens = q.split()
+
     def starts(name):
-        return any(w.startswith(q) for w in name.lower().replace("×", " ").split())
+        low = name.lower()
+        words = low.replace("×", " ").split()
+        return all(t in low or any(w.startswith(t) for w in words) for t in tokens)
 
     cats = [{"name": c.name, "url": c.get_absolute_url()}
             for c in Category.objects.filter(parent__isnull=True, is_active=True) if starts(c.name)]

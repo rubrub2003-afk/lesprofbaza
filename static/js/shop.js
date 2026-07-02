@@ -35,6 +35,7 @@
 
   /* ---------- ИЗБРАННОЕ ---------- */
   window.toggleFav=function(slug,ev){if(ev){ev.preventDefault();ev.stopPropagation();}
+    if(window.LPB_AUTH===false){ if(confirm('Избранное доступно после входа. Перейти к входу / регистрации?')) location.href='/account/'; return; }
     var a=gj(FKEY),i=a.indexOf(slug);
     if(i>-1){a.splice(i,1);toast('Убрано из избранного');}else{a.push(slug);toast('Добавлено в избранное');}
     sj(FKEY,a);paintFav();};

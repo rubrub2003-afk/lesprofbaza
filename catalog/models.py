@@ -124,6 +124,22 @@ class Product(models.Model):
         return " × ".join(str(p) for p in parts)
 
     @property
+    def dimensions_units(self):
+        """Размер с единицами: толщина мм × ширина мм × длина м."""
+        parts = []
+        if self.thickness:
+            parts.append(f"{self.thickness} мм")
+        if self.width:
+            parts.append(f"{self.width} мм")
+        if self.length:
+            m = self.length / 1000
+            m_str = ("%g" % m).replace(".", ",")
+            parts.append(f"{m_str} м")
+        if parts:
+            return " × ".join(parts)
+        return self.size_text
+
+    @property
     def volume_per_piece(self):
         if self.thickness and self.width and self.length:
             return (self.thickness * self.width * self.length) / 1_000_000_000

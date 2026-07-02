@@ -31,12 +31,14 @@ td .nm{font-weight:700}.price{font-family:'Oswald';font-size:20px}
     <tr><th>Сорт</th>{% for p in products %}<td>{{ p.grade|default:"—" }}</td>{% endfor %}</tr>
     <tr><th>Стандарт</th>{% for p in products %}<td>{{ p.standard|default:"—" }}</td>{% endfor %}</tr>
     <tr><th>Наличие</th>{% for p in products %}<td>{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</td>{% endfor %}</tr>
-    <tr><th></th>{% for p in products %}<td><a class="btn" href="{{ p.get_absolute_url }}">Открыть</a></td>{% endfor %}</tr>
+    <tr><th></th>{% for p in products %}<td><button class="btn" style="border:0;cursor:pointer;font-family:inherit;font-size:14px" onclick="addCart('{{ p.slug }}',1,this,event)">В корзину</button></td>{% endfor %}</tr>
   </table></div>
   {% else %}
   <div class="empty">Вы пока не добавили товары к сравнению. Нажмите значок «⇄» на карточках товаров.<br><br><a class="btn" href="{% url 'catalog:index' %}">Перейти в каталог</a></div>
   {% endif %}
 </div>
+<script>window.CSRF="{{ csrf_token }}";window.LPB_AUTH={{ request.user.is_authenticated|yesno:"true,false" }};</script>
+<script src="{% static 'js/shop.js' %}"></script>
 <script>
 function rmCmp(slug){try{var a=JSON.parse(localStorage.getItem('lpb_compare'))||[];var i=a.indexOf(slug);if(i>-1)a.splice(i,1);localStorage.setItem('lpb_compare',JSON.stringify(a));location.href='/catalog/compare/?items='+a.map(encodeURIComponent).join(',');}catch(e){location.reload();}}
 </script>

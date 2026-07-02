@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.models import User
 from .notifications import send_order_notification
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.admin.models import LogEntry
 
 
 def _digits(v):
@@ -174,3 +175,10 @@ def admin_stats(request):
         "orders": Order.objects.filter(status="new").count(),
         "leads": Lead.objects.filter(processed=False).count(),
     })
+
+
+@staff_member_required
+def clear_actions(request):
+    """Очистить журнал «Последние действия» для текущего сотрудника."""
+    LogEntry.objects.filter(user=request.user).delete()
+    return redirect("admin:index")

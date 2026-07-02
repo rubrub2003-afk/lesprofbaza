@@ -29,7 +29,7 @@
         <div class="c-body"><b>{{ g.name }}</b><small>{% if g.description %}{{ g.description }}{% else %}{% for c in g.children.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</small></div>
       </a>
       {% endfor %}
-      <a class="cat search-tile reveal" href="{% url 'catalog:index' %}"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><b>Не знаете, что нужно?</b><small>Напишите свои пожелания — мы поможем подобрать</small></a>
+      <a class="cat search-tile reveal" href="{% url 'catalog:index' %}"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><b>Не знаете, что нужно?</b><small>Открыть каталог →</small></a>
     </div>
   </div>
 </section>
@@ -42,11 +42,11 @@
     <div class="sec-head reveal"><div><span class="eyebrow">Сейчас покупают</span><h2>Популярное</h2></div><a class="link" href="{% url 'catalog:index' %}">Смотреть всё →</a></div>
     <div class="prods">
       {% for p in popular_products %}
-      <article class="card reveal">
+      <article class="card reveal" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'">
         <div class="ph">
           <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
           <span class="stock">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
-          <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div>{% if request.user.is_authenticated %}<div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>{% endif %}
+          <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>
         </div>
         <div class="body">
           <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>
@@ -85,7 +85,7 @@
 
 <section class="trust">
   <div class="wrap">
-    <div class="sec-head reveal" style="justify-content:center;text-align:center;flex-direction:column;gap:6px"><span class="eyebrow">Почему нам доверяют</span><h2>Доверие, а не обещания</h2></div>
+    <div class="sec-head reveal" style="justify-content:center;text-align:center;flex-direction:column;gap:6px"><span class="eyebrow" style="font-size:clamp(22px,3vw,32px);letter-spacing:.04em;color:var(--forest)">Почему нам доверяют</span></div>
     <div class="counts">
       <div class="count reveal"><b class="count-up" data-to="12">12</b><small>лет на рынке пиломатериалов</small></div>
       <div class="count reveal"><b class="count-up" data-to="6000" data-suf="+">6 000+</b><small>выполненных заказов</small></div>
@@ -117,7 +117,7 @@
       <span class="eyebrow">Как нас найти</span><h2>Самовывоз и контакты</h2>
       <div class="row"><b>Адрес</b>{{ site.address|default:"Москва, [адрес точки самовывоза]" }}</div>
       <div class="row"><b>Часы работы</b>{{ site.hours|default:"Ежедневно, 8:00–20:00" }}</div>
-      <div class="row"><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span></div>
+      <div class="row"><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span>{% if site.phone2 %}<br><span class="num">{{ site.phone2 }}</span>{% endif %}</div>
       <a class="btn btn-forest" href="{{ site.yandex_maps_url|default:'https://yandex.ru/maps' }}" target="_blank" rel="noopener" style="margin-top:8px">Открыть в Яндекс.Картах</a>
     </div>
     {% if site.map_embed %}{{ site.map_embed|safe }}{% else %}<iframe title="Карта" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=37.58%2C55.74%2C37.68%2C55.78&layer=mapnik&marker=55.76%2C37.63"></iframe>{% endif %}

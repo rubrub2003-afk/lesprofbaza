@@ -20,7 +20,7 @@
   <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">пиломатериалы · Москва и МО</span></span></a>
   <form class="search" onsubmit="return false" autocomplete="off"><input id="searchInput" type="text" placeholder="Поиск: доска, брус, вагонка…"><button><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><div class="suggest" id="suggest"></div></form>
   <div class="head-actions">
-    {% if request.user.is_authenticated %}<a class="iconbtn favlink" href="{% url 'catalog:favorites' %}" title="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="favn" style="display:none">0</span></a>{% endif %}
+    <a class="iconbtn favlink" href="{% url 'catalog:favorites' %}" title="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="favn" style="display:none">0</span></a>
     <a class="iconbtn" href="{% url 'orders:account' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a>
     <a class="iconbtn cart" href="{% url 'orders:cart' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h2l2.5 12h9L21 8H7"/><circle cx="9.5" cy="20" r="1.4"/><circle cx="17.5" cy="20" r="1.4"/></svg><span>{{ cart_count }}</span></a>
   </div>
@@ -35,7 +35,7 @@
     </div>
     <div class="info">
       <h1>{{ product.name }}</h1>
-      <div class="dim num">{{ product.dimensions }} мм{% if product.standard %} · {{ product.standard }}{% endif %}{% if product.grade %} · {{ product.grade }}{% endif %}</div>
+      <div class="dim num">{{ product.dimensions_units }}{% if product.standard %} · {{ product.standard }}{% endif %}{% if product.grade %} · {{ product.grade }}{% endif %}</div>
       <div class="row-stock">{% if product.in_stock %}<span class="in">● В наличии</span>{% else %}<span class="in" style="color:#9a3b2e">● Под заказ</span>{% endif %}{% if product.sku %}<span class="art">Артикул: {{ product.sku }}</span>{% endif %}{% if site.show_product_rating and product.avg_rating %}<span class="art">★ {{ product.avg_rating }}</span>{% endif %}</div>
       <div class="pbox">
         <div class="price">{% if product.old_price %}<span class="old num" style="text-decoration:line-through;color:#A99B82;font-size:18px;margin-right:8px">{{ product.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ product.price|floatformat:0|intcomma }}</b><span class="unit">{{ product.get_unit_display }}</span></div>
@@ -48,14 +48,9 @@
         <div class="cta-row">
           <button class="btn btn-forest" onclick="addCart('{{ product.slug }}',document.getElementById('q').value,this,event)">В корзину</button>
           <button class="btn btn-pine" onclick="openCallback('Быстрый заказ','{{ product.slug }}','Интересует: {{ product.name }}')">Быстрый заказ</button>
-          {% if request.user.is_authenticated %}<button class="btn-ic" data-fav-slug="{{ product.slug }}" title="В избранное" onclick="toggleFav('{{ product.slug }}',event)">♡</button>{% endif %}
+          <button class="btn-ic" data-fav-slug="{{ product.slug }}" title="В избранное" onclick="toggleFav('{{ product.slug }}',event)">♡</button>
           <button class="btn-ic" data-cmp-slug="{{ product.slug }}" onclick="toggleCmp('{{ product.slug }}',event)" title="Сравнить">⇄</button>
         </div>
-      </div>
-      <div class="perks">
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 13h13V6H3zM16 9h4l1 4v3h-5z"/><circle cx="6.5" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg>Доставка по Москве и МО или самовывоз</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Оплата после доставки для частных лиц</div>
-        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7l9-4 9 4v6c0 5-4 8-9 9-5-1-9-4-9-9z"/></svg>Проверка качества перед отгрузкой</div>
       </div>
     </div>
   </div>
@@ -63,17 +58,17 @@
   <section>
     <div class="tabs"><button class="on" onclick="tab(this,'desc')">Описание</button><button onclick="tab(this,'spec')">Характеристики</button>{% if site.show_product_reviews %}<button onclick="tab(this,'rev')">Отзывы{% if product.avg_rating %} · {{ product.avg_rating }}{% endif %}</button>{% endif %}</div>
     <div id="t-desc" class="tabpane on"><p class="desc">{% if product.description %}{{ product.description|linebreaksbr }}{% else %}Качественный пиломатериал из {{ product.get_species_display|lower }}. Подходит для строительства и отделки. Возможен распил под размер по согласованию с менеджером.{% endif %}</p></div>
-    <div id="t-spec" class="tabpane"><table class="spec"><tr><td>Порода</td><td>{{ product.get_species_display }}</td></tr>{% if product.grade %}<tr><td>Сорт</td><td>{{ product.grade }}</td></tr>{% endif %}{% if product.standard %}<tr><td>Стандарт</td><td>{{ product.standard }}</td></tr>{% endif %}<tr><td>Размер</td><td class="num">{{ product.dimensions }} мм</td></tr>{% if product.volume_per_piece %}<tr><td>Объём 1 шт</td><td class="num">{{ product.volume_per_piece|floatformat:3 }} м³</td></tr>{% endif %}<tr><td>Цена</td><td class="num">{{ product.price|floatformat:0|intcomma }} {{ product.get_unit_display }}</td></tr></table></div>
+    <div id="t-spec" class="tabpane"><table class="spec"><tr><td>Порода</td><td>{{ product.get_species_display }}</td></tr>{% if product.grade %}<tr><td>Сорт</td><td>{{ product.grade }}</td></tr>{% endif %}{% if product.standard %}<tr><td>Стандарт</td><td>{{ product.standard }}</td></tr>{% endif %}<tr><td>Размер</td><td class="num">{{ product.dimensions_units }}</td></tr>{% if product.volume_per_piece %}<tr><td>Объём 1 шт</td><td class="num">{{ product.volume_per_piece|floatformat:3 }} м³</td></tr>{% endif %}<tr><td>Цена</td><td class="num">{{ product.price|floatformat:0|intcomma }} {{ product.get_unit_display }}</td></tr></table></div>
     {% if site.show_product_reviews %}
     <div id="t-rev" class="tabpane">
       {% if product.avg_rating %}<div class="rev-top"><div class="rev-score"><b>{{ product.avg_rating }}</b><div class="stars">★★★★★</div><small>{{ reviews|length }} отзыв(ов)</small></div></div>{% endif %}
       {% for r in reviews %}<div class="review"><div class="stars">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div><p>{{ r.text }}</p><small>{{ r.author }}{% if r.city %} · {{ r.city }}{% endif %} · {{ r.created|date:"d.m.Y" }}</small></div>{% empty %}<p style="color:var(--ink-soft)">Отзывов пока нет — станьте первым.</p>{% endfor %}
       <form class="revform" method="post" action="{% url 'catalog:add_review' product.slug %}" id="reviews">{% csrf_token %}
         <h4 style="margin-bottom:12px;font-size:16px">Оставить отзыв</h4>
-        <div class="stars-pick" id="pick"><span onclick="rate(1)">★</span><span onclick="rate(2)">★</span><span onclick="rate(3)">★</span><span onclick="rate(4)">★</span><span onclick="rate(5)">★</span></div>
+        <div class="stars-pick" id="pick" onmouseout="restoreStars()"><span onmouseover="hoverStars(1)" onclick="rate(1)">★</span><span onmouseover="hoverStars(2)" onclick="rate(2)">★</span><span onmouseover="hoverStars(3)" onclick="rate(3)">★</span><span onmouseover="hoverStars(4)" onclick="rate(4)">★</span><span onmouseover="hoverStars(5)" onclick="rate(5)">★</span></div>
         <input type="hidden" name="rating" id="ratingInput" value="5">
         <input name="author" placeholder="Ваше имя" required><textarea name="text" placeholder="Поделитесь впечатлением о товаре" required></textarea>
-        <label style="display:flex;gap:9px;font-size:12.5px;color:var(--ink-soft);margin-bottom:12px"><input type="checkbox" required> Согласен на обработку персональных данных</label>
+        <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-soft);margin-bottom:12px"><input type="checkbox" required style="width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--forest)"><span>Согласен на обработку персональных данных</span></label>
         <button class="btn btn-forest" type="submit">Отправить отзыв</button>
         <div class="modnote">Все отзывы проходят премодерацию — публикуем только реальные.</div>
       </form>
@@ -100,7 +95,7 @@
   </form>
   <div class="ok-msg" id="cbOk" style="display:none"><div class="ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg></div><h3>Заявка принята!</h3><p class="sub">Менеджер перезвонит вам в ближайшее время.</p><button class="btn btn-forest" onclick="closeCallback()" style="width:100%">Хорошо</button></div>
 </div></div>
-<script>window.CSRF="{{ csrf_token }}";window.LEAD_URL="{% url 'orders:lead' %}";</script>
+<script>window.CSRF="{{ csrf_token }}";window.LEAD_URL="{% url 'orders:lead' %}";window.LPB_AUTH={{ request.user.is_authenticated|yesno:"true,false" }};</script>
 
 <script>
 var PRICE={{ product.price|unlocalize }}, VPP={{ product.volume_per_piece|default:0|unlocalize }}, UNIT="{{ product.unit }}";
@@ -111,7 +106,11 @@ function step(d){var i=document.getElementById('q');i.value=Math.max(0,(parseInt
 document.getElementById('q').addEventListener('input',recalc);recalc();
 function thumb(el,n){document.querySelectorAll('.thumbs div').forEach(function(d){d.classList.remove('on')});el.classList.add('on');}
 function tab(el,id){document.querySelectorAll('.tabs button').forEach(function(b){b.classList.remove('on')});el.classList.add('on');document.querySelectorAll('.tabpane').forEach(function(p){p.classList.remove('on')});document.getElementById('t-'+id).classList.add('on');}
-function rate(n){document.getElementById('ratingInput').value=n;document.querySelectorAll('#pick span').forEach(function(x,i){x.style.color=i<n?'#B97E3F':'#D6C8AC'});}
+function paintStars(n){document.querySelectorAll('#pick span').forEach(function(x,i){x.style.color=i<n?'#B97E3F':'#D6C8AC'});}
+function rate(n){document.getElementById('ratingInput').value=n;paintStars(n);}
+function hoverStars(n){paintStars(n);}
+function restoreStars(){paintStars(+document.getElementById('ratingInput').value);}
+paintStars(5);
 {% if request.GET.review == "sent" %}document.addEventListener('DOMContentLoaded',function(){var t=document.querySelectorAll('.tabs button');if(t.length)t[t.length-1].click();alert('Спасибо! Отзыв появится после проверки модератором.');});{% endif %}
 
 </script>
