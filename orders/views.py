@@ -171,9 +171,11 @@ def reorder(request, pk):
 @staff_member_required
 def admin_stats(request):
     """JSON-счётчики новых заказов/заявок для живого индикатора в админке."""
+    from catalog.models import Review
     return JsonResponse({
         "orders": Order.objects.filter(status="new").count(),
         "leads": Lead.objects.filter(processed=False).count(),
+        "reviews": Review.objects.filter(is_approved=False).count(),
     })
 
 

@@ -5,9 +5,10 @@ from django.conf import settings
 
 class Order(models.Model):
     STATUS = [
-        ("new", "Новая"),
+        ("new", "На рассмотрении"),
         ("in_progress", "В работе"),
-        ("done", "Закрыта"),
+        ("shipping", "Едет к вам"),
+        ("done", "Доставлен"),
     ]
     RECEIVE = [
         ("pickup", "Самовывоз"),

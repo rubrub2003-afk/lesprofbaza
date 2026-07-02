@@ -1,4 +1,4 @@
-{% load static humanize l10n %}<!DOCTYPE html>
+{% load static humanize l10n ru_extras %}<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,14 +61,15 @@
     <div id="t-spec" class="tabpane"><table class="spec"><tr><td>Порода</td><td>{{ product.get_species_display }}</td></tr>{% if product.grade %}<tr><td>Сорт</td><td>{{ product.grade }}</td></tr>{% endif %}{% if product.standard %}<tr><td>Стандарт</td><td>{{ product.standard }}</td></tr>{% endif %}<tr><td>Размер</td><td class="num">{{ product.dimensions_units }}</td></tr>{% if product.volume_per_piece %}<tr><td>Объём 1 шт</td><td class="num">{{ product.volume_per_piece|floatformat:3 }} м³</td></tr>{% endif %}<tr><td>Цена</td><td class="num">{{ product.price|floatformat:0|intcomma }} {{ product.get_unit_display }}</td></tr></table></div>
     {% if site.show_product_reviews %}
     <div id="t-rev" class="tabpane">
-      {% if product.avg_rating %}<div class="rev-top"><div class="rev-score"><b>{{ product.avg_rating }}</b><div class="stars">★★★★★</div><small>{{ reviews|length }} отзыв(ов)</small></div></div>{% endif %}
-      {% for r in reviews %}<div class="review"><div class="stars">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div><p>{{ r.text }}</p><small>{{ r.author }}{% if r.city %} · {{ r.city }}{% endif %} · {{ r.created|date:"d.m.Y" }}</small></div>{% empty %}<p style="color:var(--ink-soft)">Отзывов пока нет — станьте первым.</p>{% endfor %}
+      {% if product.avg_rating %}<div class="rev-top"><div class="rev-score"><b>{{ product.avg_rating }}</b><div class="stars">★★★★★</div><small>{{ reviews|length }} {{ reviews|length|plural_ru:"отзыв,отзыва,отзывов" }}</small></div></div>{% endif %}
+      {% for r in reviews %}<div class="review{% if forloop.counter > 2 %} rev-more{% endif %}"{% if forloop.counter > 2 %} style="display:none"{% endif %}><div class="stars">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div><p>{{ r.text }}</p><small>{{ r.author }}{% if r.city %} · {{ r.city }}{% endif %} · {{ r.created|date:"d.m.Y" }}</small></div>{% empty %}<p style="color:var(--ink-soft)">Отзывов пока нет — станьте первым.</p>{% endfor %}
+      {% if reviews|length > 2 %}<button type="button" onclick="showAllRev(this)" style="background:none;border:1.5px solid var(--line);border-radius:10px;padding:10px 18px;font-family:inherit;font-weight:700;color:var(--forest);cursor:pointer;margin-top:4px">Показать все отзывы ({{ reviews|length }})</button>{% endif %}
       <form class="revform" method="post" action="{% url 'catalog:add_review' product.slug %}" id="reviews">{% csrf_token %}
         <h4 style="margin-bottom:12px;font-size:16px">Оставить отзыв</h4>
         <div class="stars-pick" id="pick" onmouseout="restoreStars()"><span onmouseover="hoverStars(1)" onclick="rate(1)">★</span><span onmouseover="hoverStars(2)" onclick="rate(2)">★</span><span onmouseover="hoverStars(3)" onclick="rate(3)">★</span><span onmouseover="hoverStars(4)" onclick="rate(4)">★</span><span onmouseover="hoverStars(5)" onclick="rate(5)">★</span></div>
         <input type="hidden" name="rating" id="ratingInput" value="5">
         <input name="author" placeholder="Ваше имя" required><textarea name="text" placeholder="Поделитесь впечатлением о товаре" required></textarea>
-        <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-soft);margin-bottom:12px"><input type="checkbox" required style="width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--forest)"><span>Согласен на обработку персональных данных</span></label>
+        <label style="display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--ink-soft);margin-bottom:12px"><input type="checkbox" required style="width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--forest)"><span>Согласен на обработку персональных данных и принимаю <a href="{% url 'content:page' 'politika' %}" target="_blank" style="color:var(--forest);text-decoration:underline">политику конфиденциальности</a></span></label>
         <button class="btn btn-forest" type="submit">Отправить отзыв</button>
         <div class="modnote">Все отзывы проходят премодерацию — публикуем только реальные.</div>
       </form>
@@ -111,6 +112,7 @@ function rate(n){document.getElementById('ratingInput').value=n;paintStars(n);}
 function hoverStars(n){paintStars(n);}
 function restoreStars(){paintStars(+document.getElementById('ratingInput').value);}
 paintStars(5);
+function showAllRev(btn){document.querySelectorAll('.rev-more').forEach(function(e){e.style.display='';});btn.style.display='none';}
 {% if request.GET.review == "sent" %}document.addEventListener('DOMContentLoaded',function(){var t=document.querySelectorAll('.tabs button');if(t.length)t[t.length-1].click();alert('Спасибо! Отзыв появится после проверки модератором.');});{% endif %}
 
 </script>

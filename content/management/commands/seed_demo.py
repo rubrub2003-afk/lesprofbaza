@@ -79,11 +79,11 @@ class Command(BaseCommand):
         s.telegram = "https://t.me/nicknamedd"
         s.instagram = "https://instagram.com/les.prof.baza"
         s.tg_bot = "https://t.me/LesProfBazaBot"
-        # точная организация по ссылке клиента (одна точка, без "2 найдено")
-        s.yandex_maps_url = "https://yandex.ru/maps/-/CTajBA4w"
+        # точная организация по её Яндекс-ID (единственная верная метка)
+        s.yandex_maps_url = "https://yandex.ru/maps/org/les_prof_baza/229879173262/"
         s.map_embed = ('<iframe title="ЛЕСПРОФБАЗА на карте" loading="lazy" '
-                       'src="https://yandex.ru/map-widget/v1/?ll=37.223203%2C55.804708&z=17'
-                       '&pt=37.223203,55.804708,pm2rdm"></iframe>')
+                       'src="https://yandex.ru/map-widget/v1/org/les_prof_baza/229879173262/">'
+                       '</iframe>')
         s.save()
 
         for name, desc in GROUP_DESC.items():

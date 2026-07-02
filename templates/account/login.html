@@ -8,7 +8,7 @@
 </head><body>
 <div class="top">
   <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
-  <a class="back" href="{% url 'content:home' %}">← На сайт</a>
+  <a class="back" href="{% url 'content:home' %}">На сайт</a>
 </div>
 <div class="shell"><div class="card">
   <div class="tabs"><button id="tab-login" class="active" onclick="show('login')">Вход</button><button id="tab-reg" onclick="show('reg')">Регистрация</button></div>
@@ -21,8 +21,6 @@
       <div class="field"><label>Пароль</label><input id="p1" name="password" type="password" placeholder="Ваш пароль" required><span class="eye" onclick="toggle('p1',this)">показать</span></div>
       <div class="row-between"><label style="margin:0;display:flex;gap:7px;align-items:center;font-weight:600"><input type="checkbox"> Запомнить меня</label><a href="#" onclick="show('forgot');return false">Забыли пароль?</a></div>
       <button class="btn" type="submit">Войти</button>
-      <div class="sep">или войдите через</div>
-      <div class="alts" style="flex-wrap:wrap"><a href="#">Telegram</a><a href="#">WhatsApp</a><a href="#">MAX</a><a href="#">Google</a></div>
     </form>
     <div class="guest">Нет аккаунта? <a href="#" onclick="show('reg');return false">Зарегистрироваться</a><br>или <a href="{% url 'content:home' %}">оформить заказ без регистрации →</a></div>
   </div>

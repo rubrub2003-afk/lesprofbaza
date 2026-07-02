@@ -117,7 +117,7 @@
       <span class="eyebrow">Как нас найти</span><h2>Самовывоз и контакты</h2>
       <div class="row"><b>Адрес</b>{{ site.address|default:"Москва, [адрес точки самовывоза]" }}</div>
       <div class="row"><b>Часы работы</b>{{ site.hours|default:"Ежедневно, 8:00–20:00" }}</div>
-      <div class="row"><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span>{% if site.phone2 %}<br><span class="num">{{ site.phone2 }}</span>{% endif %}</div>
+      <div class="row"><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span>{% if site.phone2 %}<br><span class="num">{{ site.phone2 }}</span> <span style="opacity:.6">(запасной)</span>{% endif %}</div>
       <a class="btn btn-forest" href="{{ site.yandex_maps_url|default:'https://yandex.ru/maps' }}" target="_blank" rel="noopener" style="margin-top:8px">Открыть в Яндекс.Картах</a>
     </div>
     {% if site.map_embed %}{{ site.map_embed|safe }}{% else %}<iframe title="Карта" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=37.58%2C55.74%2C37.68%2C55.78&layer=mapnik&marker=55.76%2C37.63"></iframe>{% endif %}

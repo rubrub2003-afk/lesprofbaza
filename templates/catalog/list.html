@@ -48,7 +48,7 @@
     <div>
       <div class="toolbar">
         <div class="sortsel">Сортировка:
-          <select id="sort" onchange="applyF()"><option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option></select>
+          <select id="sort" onchange="PAGE=1;applyF()"><option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option></select>
         </div>
       </div>
 
@@ -70,6 +70,7 @@
         </article>
         {% endfor %}
       </div>
+      <div class="pager" id="pager"></div>
     </div>
   </div>
 </div>
@@ -81,6 +82,7 @@
 <script>
 var cards=[].slice.call(document.querySelectorAll('#prods .card'));
 var FKEY='lpb_filters';
+var PAGE=1, PAGE_SIZE=24;
 function sel(q){return [].slice.call(document.querySelectorAll(q+':checked')).map(function(c){return c.value;});}
 function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),labels:sel('.flabel'),species:sel('.fspec'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
 function applyF(){
@@ -101,14 +103,29 @@ function applyF(){
   else if(sv==='desc') vis.sort(function(a,b){return b.dataset.price-a.dataset.price;});
   else vis.sort(function(a,b){return (b.dataset.pop-a.dataset.pop);});
   vis.forEach(function(c){box.appendChild(c);});
-  document.getElementById('cnt').textContent='Показано '+shown+' из '+cards.length;
+  var total=vis.length, pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  if(PAGE>pages)PAGE=pages;
+  var start=(PAGE-1)*PAGE_SIZE, end=start+PAGE_SIZE;
+  vis.forEach(function(c,i){ if(i<start||i>=end) c.style.display='none'; });
+  var from=total?start+1:0, to=Math.min(end,total);
+  document.getElementById('cnt').textContent = total ? ('Показано '+from+'–'+to+' из '+total) : 'Ничего не найдено';
   var e=box.querySelector('.empty'); if(e)e.remove();
-  if(!shown){var d=document.createElement('div');d.className='empty';d.textContent='Ничего не найдено. Сбросьте фильтры или напишите менеджеру — поможем подобрать.';box.appendChild(d);}
+  if(!total){var d=document.createElement('div');d.className='empty';d.textContent='Ничего не найдено. Сбросьте фильтры или напишите менеджеру — поможем подобрать.';box.appendChild(d);}
+  renderPager(pages);
   saveState();
 }
-document.querySelectorAll('.fcat,.flabel,.fspec,.fstock').forEach(function(c){c.addEventListener('change',applyF);});
-document.getElementById('pmin').addEventListener('input',applyF);document.getElementById('pmax').addEventListener('input',applyF);
-function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.getElementById('sort').value='pop';try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
+function renderPager(pages){
+  var pg=document.getElementById('pager'); if(!pg)return;
+  if(pages<=1){pg.innerHTML='';return;}
+  var h='<a href="#" class="'+(PAGE<=1?'off':'')+'" onclick="gotoPage('+(PAGE-1)+');return false">‹</a>';
+  for(var i=1;i<=pages;i++){h+='<a href="#" class="'+(i===PAGE?'on':'')+'" onclick="gotoPage('+i+');return false">'+i+'</a>';}
+  h+='<a href="#" class="'+(PAGE>=pages?'off':'')+'" onclick="gotoPage('+(PAGE+1)+');return false">›</a>';
+  pg.innerHTML=h;
+}
+function gotoPage(n){PAGE=Math.max(1,n);applyF();window.scrollTo({top:0,behavior:'smooth'});}
+document.querySelectorAll('.fcat,.flabel,.fspec,.fstock').forEach(function(c){c.addEventListener('change',function(){PAGE=1;applyF();});});
+document.getElementById('pmin').addEventListener('input',function(){PAGE=1;applyF();});document.getElementById('pmax').addEventListener('input',function(){PAGE=1;applyF();});
+function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
 (function(){
   var params=new URLSearchParams(location.search), cat=params.get('cat');
   if(cat){var cb=document.querySelector('.fcat[value="'+cat+'"]');if(cb)cb.checked=true;}

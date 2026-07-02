@@ -20,10 +20,11 @@
       else if(s){ s.remove(); }
     });
   }
-  function applyDots(O,L){
+  function applyDots(O,L,R){
     setDot('/orders/order/',O);
     setDot('/orders/lead/',L);
-    var t=O+L;
+    setDot('/catalog/review/',R);
+    var t=O+L+R;
     document.title=(t>0?'('+t+') ':'')+baseTitle;
   }
   function notify(diff){
@@ -38,15 +39,15 @@
     fetch(STATS_URL,{headers:{'X-Requested-With':'XMLHttpRequest'}})
       .then(function(r){return r.json();})
       .then(function(d){
-        applyDots(d.orders,d.leads);
-        var t=d.orders+d.leads;
+        applyDots(d.orders,d.leads,d.reviews||0);
+        var t=d.orders+d.leads+(d.reviews||0);
         if(last!==null && t>last){ notify(t-last); }
         last=t;
       }).catch(function(){});
   }
   document.addEventListener('DOMContentLoaded',function(){
-    last={{ admin_new_orders|default:0 }}+{{ admin_new_leads|default:0 }};
-    applyDots({{ admin_new_orders|default:0 }},{{ admin_new_leads|default:0 }});
+    last={{ admin_new_orders|default:0 }}+{{ admin_new_leads|default:0 }}+{{ admin_new_reviews|default:0 }};
+    applyDots({{ admin_new_orders|default:0 }},{{ admin_new_leads|default:0 }},{{ admin_new_reviews|default:0 }});
     setInterval(poll, 20000);
     var ram=document.getElementById('recent-actions-module');
     if(ram){var h=ram.querySelector('h2,h3');

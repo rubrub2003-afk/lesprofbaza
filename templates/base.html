@@ -61,7 +61,7 @@
       <div class="contacts"><h4>Контакты</h4>
         <div><b>Адрес и самовывоз</b>{{ site.address|default:"Москва, [адрес точки самовывоза]" }}</div>
         <div><b>Часы работы</b>{{ site.hours|default:"Ежедневно, 8:00–20:00" }}</div>
-        <div><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span>{% if site.phone2 %}<br><span class="num">{{ site.phone2 }}</span>{% endif %}</div>
+        <div><b>Телефон</b><span class="num">{{ site.phone|default:"+7 (495) 000-00-00" }}</span>{% if site.phone2 %}<br><span class="num">{{ site.phone2 }}</span> <span style="opacity:.6">(запасной)</span>{% endif %}</div>
         <div><b>Мессенджеры</b><span class="msgrs">{% if site.whatsapp %}<a href="{{ site.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}{% if site.telegram %}<a href="{{ site.telegram }}" target="_blank" rel="noopener">Telegram</a>{% endif %}{% if site.tg_bot %}<a href="{{ site.tg_bot }}" target="_blank" rel="noopener">Бот</a>{% endif %}{% if site.instagram %}<a href="{{ site.instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif %}</span></div>
         <div><b>Почта</b><a href="mailto:{{ site.email|default:'info@lesprofbaza.ru' }}">{{ site.email|default:"info@lesprofbaza.ru" }}</a></div>
       </div>
@@ -87,7 +87,7 @@
       <input type="hidden" name="product" id="cbProduct">
       <input type="hidden" name="comment" id="cbComment">
       <button class="btn btn-pine" type="submit">Отправить</button>
-      <div class="consent">Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</div>
+      <div class="consent">Нажимая кнопку, вы соглашаетесь на обработку персональных данных и <a href="{% url 'content:page' 'politika' %}" target="_blank" style="color:var(--forest);text-decoration:underline">политику конфиденциальности</a>.</div>
     </form>
     <div class="ok-msg" id="cbOk">
       <div class="ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.4"><path d="M5 13l4 4L19 7"/></svg></div>

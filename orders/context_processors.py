@@ -1,5 +1,6 @@
 """Счётчики новых заказов/заявок — только для страниц админки (красная точка)."""
 from .models import Order, Lead
+from catalog.models import Review
 
 
 def admin_badges(request):
@@ -10,4 +11,5 @@ def admin_badges(request):
     return {
         "admin_new_orders": Order.objects.filter(status="new").count(),
         "admin_new_leads": Lead.objects.filter(processed=False).count(),
+        "admin_new_reviews": Review.objects.filter(is_approved=False).count(),
     }

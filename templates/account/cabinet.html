@@ -15,7 +15,8 @@ h1{font-family:'Oswald';text-transform:uppercase;font-size:clamp(26px,3.4vw,36px
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
 .card h2{font-family:'Oswald';text-transform:uppercase;font-size:17px;margin-bottom:14px}
 .badge{display:inline-block;font-family:'Oswald';text-transform:uppercase;font-size:12px;padding:4px 10px;border-radius:6px;color:#fff}
-.b-new{background:var(--pine)}.b-work{background:var(--forest)}.b-done{background:#3a3733}
+.b-new{background:var(--pine)}.b-work{background:var(--forest)}.b-ship{background:#2f6f9f}.b-done{background:#3a3733}
+.compo td{border-top:0;padding:2px 10px 16px;color:var(--ink-soft);font-size:13px}.compo-l{font-family:'Oswald';text-transform:uppercase;font-size:11px;letter-spacing:.05em;color:var(--pine);margin-right:6px}tr.ord td{border-bottom:0;padding-bottom:4px}
 .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}.row:last-child{border-bottom:0}
 table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{font-family:'Oswald';text-transform:uppercase;font-size:12px;color:var(--ink-soft)}
 .empty{color:var(--ink-soft);text-align:center;padding:30px}
@@ -25,7 +26,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
 </style></head><body>
 <div class="top">
   <a class="logo" href="{% url 'content:home' %}"><img style="width:auto;height:46px" src="{% static 'img/emblem.png' %}" alt=""><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
-  <div class="right"><a class="lnk favlink" href="{% url 'catalog:favorites' %}">Избранное</a><a class="lnk" href="{% url 'content:home' %}">← На сайт</a><a class="out" href="{% url 'orders:logout' %}" title="Выйти из кабинета" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></a></div>
+  <div class="right"><a class="lnk favlink" href="{% url 'catalog:favorites' %}">Избранное</a><a class="lnk" href="{% url 'content:home' %}">На сайт</a><a class="out" href="{% url 'orders:logout' %}" title="Выйти из кабинета" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></a></div>
 </div>
 <div class="shell">
   <h1>Здравствуйте{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</h1>
@@ -34,7 +35,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
   {% if active %}
   <div class="card">
     <h2>Активный заказ</h2>
-    <div class="row"><span>Статус</span><span class="badge {% if active.status == 'new' %}b-new{% elif active.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ active.get_status_display }}</span></div>
+    <div class="row"><span>Статус</span><span class="badge {% if active.status == 'new' %}b-new{% elif active.status == 'in_progress' %}b-work{% elif active.status == 'shipping' %}b-ship{% else %}b-done{% endif %}">{{ active.get_status_display }}</span></div>
     <div class="row"><span>Получение</span><span>{{ active.get_receive_display }}</span></div>
     <div class="row"><span>Сумма (предв.)</span><b class="num">{{ active.total|floatformat:0|intcomma }} ₽</b></div>
     <div class="row"><span>Создан</span><span>{{ active.created|date:"d.m.Y H:i" }}</span></div>
@@ -45,8 +46,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
     <h2>История заказов</h2>
     {% if orders %}
     <table><tr><th>Дата</th><th>Получение</th><th>Сумма</th><th>Статус</th><th></th></tr>
-      {% for o in orders %}<tr><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td><td><a href="{% url 'orders:reorder' o.pk %}" style="color:var(--forest);font-weight:700;white-space:nowrap">↻ Повторить</a></td></tr>
-      <tr><td colspan="5" style="border-top:0;padding-top:0;color:var(--ink-soft);font-size:12.5px">{% for it in o.items.all %}{{ it.name }} <b class="num">×{{ it.qty }}</b>{% if not forloop.last %} · {% endif %}{% empty %}—{% endfor %}</td></tr>{% endfor %}
+      {% for o in orders %}<tr class="ord"><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% elif o.status == 'shipping' %}b-ship{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td><td><a href="{% url 'orders:reorder' o.pk %}" style="color:var(--forest);font-weight:700;white-space:nowrap">↻ Повторить</a></td></tr>
+      <tr class="compo"><td colspan="5"><span class="compo-l">Состав</span>{% for it in o.items.all %}{{ it.name }}&nbsp;<b class="num">×{{ it.qty }}</b>{% if not forloop.last %} · {% endif %}{% empty %}—{% endfor %}</td></tr>{% endfor %}
     </table>
     {% else %}<div class="empty">Заказов пока нет. <a href="{% url 'catalog:index' %}" style="color:var(--forest);font-weight:700">Перейти в каталог →</a></div>{% endif %}
   </div>
