@@ -13,17 +13,22 @@
   var STATS_URL="/staff/stats/";
   var baseTitle=document.title.replace(/^\(\d+\)\s*/,'');
   var last=null;
-  function setDot(suffix,n){
+  function setDot(suffix,n,kind){
     document.querySelectorAll('a[href$="'+suffix+'"]').forEach(function(a){
       var s=a.querySelector('.lpb-dot');
-      if(n>0){ if(!s){s=document.createElement('span');s.className='lpb-dot';a.appendChild(s);} s.textContent=n; s.title='Новых: '+n; }
+      if(n>0){ if(!s){s=document.createElement('span');s.className='lpb-dot';a.appendChild(s);
+                 s.onclick=function(e){e.preventDefault();e.stopPropagation();markSeen(kind);};}
+               s.textContent=n; s.title='Новых: '+n+'. Нажмите, чтобы отметить просмотренным'; s.style.cursor='pointer'; }
       else if(s){ s.remove(); }
     });
   }
+  function markSeen(kind){
+    fetch('/staff/mark-seen/'+kind+'/',{headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(){poll();});
+  }
   function applyDots(O,L,R){
-    setDot('/orders/order/',O);
-    setDot('/orders/lead/',L);
-    setDot('/catalog/review/',R);
+    setDot('/orders/order/',O,'orders');
+    setDot('/orders/lead/',L,'leads');
+    setDot('/catalog/review/',R,'reviews');
     var t=O+L+R;
     document.title=(t>0?'('+t+') ':'')+baseTitle;
   }
@@ -49,6 +54,10 @@
     last={{ admin_new_orders|default:0 }}+{{ admin_new_leads|default:0 }}+{{ admin_new_reviews|default:0 }};
     applyDots({{ admin_new_orders|default:0 }},{{ admin_new_leads|default:0 }},{{ admin_new_reviews|default:0 }});
     setInterval(poll, 20000);
+    var p=location.pathname;
+    if(/\/orders\/order\/$/.test(p)) markSeen('orders');
+    else if(/\/orders\/lead\/$/.test(p)) markSeen('leads');
+    else if(/\/catalog\/review\/$/.test(p)) markSeen('reviews');
     var ram=document.getElementById('recent-actions-module');
     if(ram){var h=ram.querySelector('h2,h3');
       if(h && !h.querySelector('.lpb-clear')){

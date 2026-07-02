@@ -24,6 +24,7 @@ class Order(models.Model):
     comment = models.TextField("Комментарий", blank=True)
     total = models.DecimalField("Сумма (предв.)", max_digits=12, decimal_places=2, default=0)
     status = models.CharField("Статус", max_length=12, choices=STATUS, default="new")
+    admin_seen = models.BooleanField("Просмотрено администратором", default=False)
     created = models.DateTimeField("Создана", auto_now_add=True)
 
     class Meta:
@@ -67,6 +68,7 @@ class Lead(models.Model):
     product = models.ForeignKey("catalog.Product", null=True, blank=True,
                                 on_delete=models.SET_NULL, verbose_name="Товар")
     processed = models.BooleanField("Обработана", default=False)
+    admin_seen = models.BooleanField("Просмотрено администратором", default=False)
     created = models.DateTimeField("Создана", auto_now_add=True)
 
     class Meta:

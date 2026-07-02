@@ -173,10 +173,23 @@ def admin_stats(request):
     """JSON-счётчики новых заказов/заявок для живого индикатора в админке."""
     from catalog.models import Review
     return JsonResponse({
-        "orders": Order.objects.filter(status="new").count(),
-        "leads": Lead.objects.filter(processed=False).count(),
-        "reviews": Review.objects.filter(is_approved=False).count(),
+        "orders": Order.objects.filter(status="new", admin_seen=False).count(),
+        "leads": Lead.objects.filter(processed=False, admin_seen=False).count(),
+        "reviews": Review.objects.filter(is_approved=False, admin_seen=False).count(),
     })
+
+
+@staff_member_required
+def mark_seen(request, kind):
+    """Отметить новые заказы/заявки/отзывы как просмотренные (гасит красную точку)."""
+    from catalog.models import Review
+    if kind == "orders":
+        Order.objects.filter(status="new", admin_seen=False).update(admin_seen=True)
+    elif kind == "leads":
+        Lead.objects.filter(processed=False, admin_seen=False).update(admin_seen=True)
+    elif kind == "reviews":
+        Review.objects.filter(is_approved=False, admin_seen=False).update(admin_seen=True)
+    return JsonResponse({"ok": True})
 
 
 @staff_member_required

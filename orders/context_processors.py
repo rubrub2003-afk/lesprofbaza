@@ -9,7 +9,7 @@ def admin_badges(request):
     if not getattr(request, "user", None) or not request.user.is_staff:
         return {}
     return {
-        "admin_new_orders": Order.objects.filter(status="new").count(),
-        "admin_new_leads": Lead.objects.filter(processed=False).count(),
-        "admin_new_reviews": Review.objects.filter(is_approved=False).count(),
+        "admin_new_orders": Order.objects.filter(status="new", admin_seen=False).count(),
+        "admin_new_leads": Lead.objects.filter(processed=False, admin_seen=False).count(),
+        "admin_new_reviews": Review.objects.filter(is_approved=False, admin_seen=False).count(),
     }

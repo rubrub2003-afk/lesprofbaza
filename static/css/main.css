@@ -107,7 +107,7 @@ section{padding:62px 0}
 .sec-head .link:hover{border-color:var(--forest)}
 
 /* категории */
-.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .cat{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .25s,border-color .2s}
 .cat:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--forest)}
 .cat .thumb{height:104px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
@@ -121,8 +121,8 @@ section{padding:62px 0}
 .cat.search-tile b{color:#fff}.cat.search-tile small{color:rgba(255,255,255,.85)}
 
 /* товары */
-.prods{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .3s}
+.prods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .3s}
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
 .card .ph{height:160px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
 .card .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 14px);transition:transform .4s}

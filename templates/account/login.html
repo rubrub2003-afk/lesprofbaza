@@ -21,6 +21,8 @@
       <div class="field"><label>Пароль</label><input id="p1" name="password" type="password" placeholder="Ваш пароль" required><span class="eye" onclick="toggle('p1',this)">показать</span></div>
       <div class="row-between"><label style="margin:0;display:flex;gap:7px;align-items:center;font-weight:600"><input type="checkbox"> Запомнить меня</label><a href="#" onclick="show('forgot');return false">Забыли пароль?</a></div>
       <button class="btn" type="submit">Войти</button>
+      <div class="sep">или войдите через</div>
+      <div class="alts" style="flex-wrap:wrap"><a href="#" onclick="soon('Telegram');return false">Telegram</a><a href="#" onclick="soon('VK');return false">VK</a><a href="#" onclick="soon('Яндекс ID');return false">Яндекс</a><a href="#" onclick="soon('Google');return false">Google</a></div>
     </form>
     <div class="guest">Нет аккаунта? <a href="#" onclick="show('reg');return false">Зарегистрироваться</a><br>или <a href="{% url 'content:home' %}">оформить заказ без регистрации →</a></div>
   </div>
@@ -54,6 +56,7 @@
 function show(w){['login','reg','forgot'].forEach(function(k){var el=document.getElementById('pane-'+k);if(el)el.classList.toggle('active',w===k);});document.getElementById('tab-login').classList.toggle('active',w==='login');document.getElementById('tab-reg').classList.toggle('active',w==='reg');}
 function toggle(id,el){var i=document.getElementById(id);var s=i.type==='password';i.type=s?'text':'password';el.textContent=s?'скрыть':'показать';}
 function fmethod(w){document.getElementById('m-phone').classList.toggle('active',w==='phone');document.getElementById('m-email').classList.toggle('active',w==='email');document.getElementById('fLabel').textContent=w==='phone'?'Телефон':'E-mail';document.getElementById('fInput').placeholder=w==='phone'?'+7 (___) ___-__-__':'you@example.ru';}
+function soon(n){alert("Вход через "+n+" скоро появится.");}
 show("{{ tab|default:'login' }}");
 </script>
 <script src="{% static 'js/site.js' %}"></script>

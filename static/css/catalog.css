@@ -27,7 +27,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:6px 0 22px;flex-wrap:wrap}
 .page-h h1{font-size:clamp(26px,3.4vw,40px)}.page-h .cnt{color:var(--ink-soft);font-size:14px}
 /* раскладка */
-.layout{display:grid;grid-template-columns:264px 1fr;gap:26px;padding-bottom:60px}
+.layout{display:grid;grid-template-columns:264px minmax(0,1fr);gap:26px;padding-bottom:60px}
 .filters{align-self:start;position:sticky;top:90px;max-height:calc(100vh - 108px);overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
 .filters .fg{border-bottom:1px solid var(--line);padding:14px 0}.filters .fg:first-child{padding-top:0}.filters .fg:last-child{border-bottom:0}
 .filters h4{font-family:'Oswald';text-transform:uppercase;font-size:13px;letter-spacing:.04em;margin-bottom:12px}
@@ -44,8 +44,8 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .sortsel{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-soft)}
 .sortsel select{height:42px;border:1.5px solid var(--line);border-radius:10px;padding:0 38px 0 14px;font-family:inherit;font-size:14px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background:var(--paper) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%23544E44' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 14px center}
 /* карточки */
-.prods{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .3s}
+.prods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .3s}
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
 .card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
 .card .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 14px);transition:transform .4s}
@@ -60,7 +60,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .stock.order{color:#9a3b2e}
 .card .body{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .card .dimrow{font-family:'Oswald';font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
-.card h3{font-family:'Manrope';font-weight:700;text-transform:none;font-size:15.5px;line-height:1.3}
+.card h3{font-family:'Manrope';font-weight:700;text-transform:none;font-size:15.5px;line-height:1.3;overflow-wrap:break-word}
 .card .meta{font-size:12.5px;color:var(--ink-soft)}
 .card .price{margin-top:auto;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
 .card .price .old{text-decoration:line-through;color:#A99B82;font-size:13px}
@@ -81,7 +81,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .cmpbar button{background:var(--pine);color:#fff;border:0;border-radius:999px;padding:11px 22px;font-weight:700;cursor:pointer;font-family:inherit}
 footer{background:#15140F;color:rgba(239,230,213,.7);padding:30px 0;font-size:13px;margin-top:auto}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-@media(max-width:960px){.layout{grid-template-columns:1fr}.filters{position:static;max-height:none}.prods{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:960px){.layout{grid-template-columns:1fr}.filters{position:static;max-height:none}.prods{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){
   .head .wrap{height:auto;flex-wrap:wrap;gap:10px 12px;padding:10px 0}
   .logo .mark{width:40px;height:40px}.logo .name{font-size:18px}
@@ -89,5 +89,5 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   .search{order:3;flex-basis:100%}
   .wrap{padding:0 16px}
 }
-@media(max-width:560px){.prods{grid-template-columns:1fr 1fr}.card .actions{flex-direction:column}}
+@media(max-width:560px){.prods{grid-template-columns:repeat(2,minmax(0,1fr))}.card .actions{flex-direction:column}}
 @media(max-width:430px){.prods{grid-template-columns:1fr}}

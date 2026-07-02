@@ -181,6 +181,7 @@ class Review(models.Model):
     rating = models.PositiveSmallIntegerField("Оценка", default=5, choices=[(i, str(i)) for i in range(1, 6)])
     text = models.TextField("Текст отзыва")
     is_approved = models.BooleanField("Одобрен (опубликован)", default=False)
+    admin_seen = models.BooleanField("Просмотрено администратором", default=False)
     created = models.DateTimeField("Дата", auto_now_add=True)
 
     class Meta:
