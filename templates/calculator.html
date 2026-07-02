@@ -167,6 +167,16 @@ E('genqty').addEventListener('input',function(){recalc('gen')});
 E('price').addEventListener('input',function(){recalc(mode==='m3'?'dims':'gen')});
 E('cost').addEventListener('input',function(){recalc('cost')});
 recalc('qty');
+// блокируем нецифровой ввод (e, +, -, буквы) в числовых полях
+document.querySelectorAll('input[type=number]').forEach(function(el){
+  el.addEventListener('keydown',function(e){
+    if(e.ctrlKey||e.metaKey) return;
+    if(['e','E','+','-'].indexOf(e.key)>-1) e.preventDefault();
+  });
+  el.addEventListener('input',function(){
+    if(/[^0-9.,]/.test(el.value)){ el.value=el.value.replace(/[^0-9.,]/g,''); }
+  });
+});
 </script>
 </body>
 </html>

@@ -46,4 +46,26 @@
       .then(function(d){ if(d.ok){ document.getElementById('cbForm').style.display='none'; document.getElementById('cbOk').style.display='block'; } else { alert(d.error||'Проверьте телефон'); } })
       .catch(function(){ alert('Не удалось отправить, попробуйте позвонить нам.'); });
   };
+
+  function lpbGuardNumeric(){
+    document.querySelectorAll('input[type="number"], input[inputmode="numeric"], input.q').forEach(function(el){
+      if(el.dataset.ng) return; el.dataset.ng='1';
+      var dec = (el.step && el.step!=='' && el.step!=='1') || el.classList.contains('dec') || ['vol','cost','price','genqty'].indexOf(el.id)>-1;
+      el.addEventListener('keydown',function(e){
+        if(e.ctrlKey||e.metaKey||e.altKey) return;
+        var ok=['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
+        if(ok.indexOf(e.key)>-1) return;
+        if(e.key.length>1) return;
+        if(/[0-9]/.test(e.key)) return;
+        if(dec && (e.key==='.'||e.key===',') && el.value.indexOf('.')<0 && el.value.indexOf(',')<0) return;
+        e.preventDefault();
+      });
+      el.addEventListener('input',function(){
+        var v=el.value;
+        var c = dec ? v.replace(/[^0-9.,]/g,'').replace(',','.').replace(/(\..*)\./g,'$1') : v.replace(/[^0-9]/g,'');
+        if(c!==v) el.value=c;
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded',lpbGuardNumeric);
 })();
