@@ -1,6 +1,7 @@
 """Модели каталога ЛЕСПРОФБАЗА: категории, метки, товары, фото, отзывы."""
 from django.db import models
 from django.urls import reverse
+import re
 from django.utils.text import slugify
 
 
@@ -13,6 +14,7 @@ class Unit(models.TextChoices):
     M2 = "m2", "₽ / м²"
     PIECE = "pc", "₽ / шт"
     RM = "rm", "₽ / пог.м"
+    SHEET = "sheet", "₽ / лист"
 
 
 class Species(models.TextChoices):
@@ -85,7 +87,7 @@ class Product(models.Model):
     width = models.PositiveIntegerField("Ширина, мм", null=True, blank=True)
     length = models.PositiveIntegerField("Длина, мм", null=True, blank=True)
     size_text = models.CharField("Размер (текстом)", max_length=80, blank=True)
-    unit = models.CharField("Единица цены", max_length=4, choices=Unit.choices, default=Unit.M3)
+    unit = models.CharField("Единица цены", max_length=6, choices=Unit.choices, default=Unit.M3)
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
     old_price = models.DecimalField("Старая цена", max_digits=10, decimal_places=2, null=True, blank=True)
     in_stock = models.BooleanField("В наличии", default=True)
@@ -125,7 +127,7 @@ class Product(models.Model):
 
     @property
     def dimensions_units(self):
-        """Размер с единицами: толщина мм × ширина мм × длина м."""
+        """Размер с единицами: толщина мм × ширина мм × длина м (длина текстом, если диапазон)."""
         parts = []
         if self.thickness:
             parts.append(f"{self.thickness} мм")
@@ -133,8 +135,11 @@ class Product(models.Model):
             parts.append(f"{self.width} мм")
         if self.length:
             m = self.length / 1000
-            m_str = ("%g" % m).replace(".", ",")
-            parts.append(f"{m_str} м")
+            parts.append(("%g" % m).replace(".", ",") + " м")
+        else:
+            segs = [x.strip() for x in re.split(r'[×хx]', self.size_text or '')]
+            if len(segs) >= 3 and segs[-1] and any(ch in segs[-1] for ch in ("м", "–", "-")):
+                parts.append(segs[-1])
         if parts:
             return " × ".join(parts)
         return self.size_text

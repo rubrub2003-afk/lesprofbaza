@@ -9,8 +9,10 @@ def home(request):
     for p in popular:
         if p.old_price and p.old_price > p.price:
             p.discount = round((float(p.old_price) - float(p.price)) / float(p.old_price) * 100)
+            p.saving = int(float(p.old_price) - float(p.price))
         else:
             p.discount = None
+            p.saving = None
     faqs = FAQ.objects.filter(is_active=True)
     return render(request, "home.html", {"popular_products": popular, "faqs": faqs})
 

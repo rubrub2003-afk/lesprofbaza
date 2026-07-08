@@ -10,8 +10,10 @@ def _decorate(products):
     for p in out:
         if p.old_price and p.old_price > p.price:
             p.discount = round((float(p.old_price) - float(p.price)) / float(p.old_price) * 100)
+            p.saving = int(float(p.old_price) - float(p.price))
         else:
             p.discount = None
+            p.saving = None
     return out
 
 

@@ -14,7 +14,7 @@ import openpyxl
 
 UNIT = {'м²': 'm2', 'м³': 'm3', 'пог. м': 'rm', 'пог.м': 'rm', 'шт': 'pc'}
 GROUPS = ["Вагонка", "Доска", "Брус и брусок", "Фасадные материалы",
-          "Погонаж", "Мебельный щит", "Элементы лестниц"]
+          "Погонаж", "Мебельный щит", "Элементы лестниц", "Плиты"]
 
 
 def money(s):
@@ -187,7 +187,7 @@ def parse_larch(ws):
             price = num(Fc) or num(E) or num(G)      # Прима, иначе Экстра/АВ
             if not price:
                 continue
-            size = f"{th} × {wd}" if wd else f"{th}"
+            size = (f"{th} × {wd}" if wd else f"{th}") + " × 2–4 м"
             rows = "".join(f"<tr><td>{k}</td><td>{num(v):,} ₽</td></tr>".replace(",", " ")
                            for k, v in sorts.items() if num(v))
             desc = ('<p class="sortnote">Цена зависит от сорта древесины (за м²):</p>'
@@ -214,9 +214,31 @@ def parse_larch(ws):
             if not price:
                 continue
             out.append(dict(base="Мебельный щит лиственница", group="Мебельный щит",
-                            standard="", grade=(Fc or ""), size=f"{th} × {D}",
+                            standard="", grade=(Fc or ""), size=f"{th} × {D} × 2–4 м",
                             price=price, unit="m2", species="larch",
                             thickness=th, width=None, length=None, desc=""))
+    return out
+
+
+def parse_osb(ws):
+    out = []
+    for r in ws.iter_rows(values_only=True):
+        cells = [(str(c).strip() if c is not None else '') for c in r]
+        A, B, C = cells[0], cells[1], cells[2]
+        if re.match(r'^\d+$', A) and B and C:
+            th = int(A)
+            m = re.search(r'\d[\d\s]*', C)
+            price = int(m.group().replace(' ', '')) if m else None
+            if not price:
+                continue
+            sheet = B.replace('x', '×').replace('X', '×').replace('х', '×').strip()
+            out.append(dict(base="OSB-плита", group="Плиты", standard="", grade="",
+                            size=f"{th} мм", size_text=f"лист {sheet} м",
+                            price=price, unit="sheet", species="other",
+                            thickness=th, width=None, length=None,
+                            desc=("Ориентированно-стружечная плита OSB-3 — прочная и влагостойкая. "
+                                  "Для чернового пола, обшивки стен, кровли и опалубки. "
+                                  f"Размер листа {sheet} м, толщина {th} мм.")))
     return out
 
 
@@ -232,13 +254,14 @@ class Command(BaseCommand):
         wb = openpyxl.load_workbook(path, data_only=True)
         soft = parse_softwood(wb["Сосна и ель"])
         larch = parse_larch(wb["Лиственница"])
-        items = soft + larch
+        osb = parse_osb(wb["Sheet3"]) if "Sheet3" in wb.sheetnames else []
+        items = soft + larch + osb
         # финальные поля
         for it in items:
             if "thickness" not in it:
                 t, w, l, stext = parse_dims(it["size"])
                 it["thickness"], it["width"], it["length"] = t, w, l
-            it["size_text"] = it["size"]
+            it["size_text"] = it.get("size_text") or it["size"]
             name = f"{it['base']} {it['size']}"
             if it.get("standard"):
                 name += f", {it['standard']}"

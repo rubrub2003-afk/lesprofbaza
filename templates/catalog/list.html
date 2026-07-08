@@ -65,6 +65,7 @@
             <h3>{{ p.name }}</h3>
             <div class="meta">{{ p.get_species_display }}{% if p.grade %} · {{ p.grade }}{% endif %}</div>
             <div class="price">{% if p.old_price %}<span class="old num">{{ p.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ p.price|floatformat:0|intcomma }}</b><span class="unit">{{ p.get_unit_display }}</span></div>
+            {% if p.discount %}<div class="selling">Выгода {{ p.saving|intcomma }} ₽ · −{{ p.discount }}%</div>{% elif p.price_per_piece %}<div class="hint">≈ {{ p.price_per_piece|intcomma }} ₽ за штуку</div>{% endif %}
             <div class="actions"><button class="btn btn-forest" onclick="addCart('{{ p.slug }}',1,this,event)">В корзину</button><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый заказ</a></div>
           </div>
         </article>
@@ -146,5 +147,22 @@ function resetF(){document.querySelectorAll('.filters input').forEach(function(i
 </script>
 {% include '_search.html' %}
 <script src="{% static 'js/shop.js' %}"></script>
+<script>
+(function(){ if(new URLSearchParams(location.search).get('debug')!=='1')return;
+  var box=document.createElement('div');
+  box.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99999;background:#111;color:#3f3;font:12px/1.55 monospace;padding:9px 11px;border-radius:8px;white-space:pre;box-shadow:0 6px 20px rgba(0,0,0,.4)';
+  document.body.appendChild(box);
+  function w(s){var e=document.querySelector(s);return e?Math.round(e.getBoundingClientRect().width):'-';}
+  function upd(){var wr=document.querySelectorAll('.wrap');
+    box.textContent='innerWidth: '+window.innerWidth
+      +'\nclientWidth: '+document.documentElement.clientWidth
+      +'\nscrollbar: '+(window.innerWidth-document.documentElement.clientWidth)+'px'
+      +'\n.wrap: '+(wr.length?Math.round(wr[wr.length-1].getBoundingClientRect().width):'-')
+      +'\n.layout: '+w('.layout')+'   .filters: '+w('.filters')
+      +'\n.prods: '+w('.prods')
+      +'\npageWidth: '+document.documentElement.scrollWidth; }
+  upd(); setInterval(upd,300);
+})();
+</script>
 </body>
 </html>
