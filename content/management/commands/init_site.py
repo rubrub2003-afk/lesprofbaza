@@ -12,14 +12,15 @@ class Command(BaseCommand):
     help = "Наполнить сайт данными при первом запуске (идемпотентно)"
 
     def handle(self, *args, **opts):
-        if Product.objects.exists():
-            self.stdout.write("Каталог уже наполнен — пропускаю.")
+        price = Path(settings.BASE_DIR) / "data" / "price.xlsx"
+        # (пере)импортируем, если новый каталог (с лиственницей) ещё не загружен
+        need_import = not Product.objects.filter(species="larch").exists()
+        if need_import and price.exists():
+            call_command("import_price", str(price))
+        elif not price.exists():
+            self.stdout.write(self.style.WARNING("Файл прайса не найден: " + str(price)))
         else:
-            price = Path(settings.BASE_DIR) / "data" / "price.xlsx"
-            if price.exists():
-                call_command("import_price", str(price))
-            else:
-                self.stdout.write(self.style.WARNING("Файл прайса не найден: " + str(price)))
+            self.stdout.write("Новый каталог уже загружен — импорт пропущен.")
         call_command("seed_demo")
         self._ensure_admin()
         self.stdout.write(self.style.SUCCESS("Сайт инициализирован."))
