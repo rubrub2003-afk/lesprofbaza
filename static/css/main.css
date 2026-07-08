@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{overflow-y:scroll}
 html{scroll-behavior:smooth}
-body{overflow-x:hidden;max-width:100%}
+body{overflow-x:clip;max-width:100%}
 body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:var(--sand);line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3,.display{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.01em;line-height:1.05;text-transform:uppercase}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
@@ -119,6 +119,24 @@ section{padding:62px 0}
 .cat.search-tile{background:var(--forest);border-color:var(--forest);justify-content:center;align-items:center;text-align:center;color:#fff;padding:20px}
 .cat.search-tile .ico{width:40px;height:40px;color:var(--pine-2);margin-bottom:10px}
 .cat.search-tile b{color:#fff}.cat.search-tile small{color:rgba(255,255,255,.85)}
+
+/* блоки пород */
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.spec-card{position:relative;min-height:320px;border-radius:20px;overflow:hidden;display:flex;align-items:flex-end;box-shadow:var(--shadow);transition:transform .25s,box-shadow .3s}
+.spec-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.spec-card::before{content:"";position:absolute;inset:0;transition:transform .5s}
+.spec-card:hover::before{transform:scale(1.05)}
+.sc-pine::before{background:repeating-linear-gradient(91deg,rgba(70,48,24,.13) 0 3px,transparent 3px 16px),radial-gradient(120% 120% at 20% 0,#e2c191,transparent 60%),linear-gradient(160deg,#cda874,#8f6c40)}
+.sc-larch::before{background:repeating-linear-gradient(91deg,rgba(60,30,14,.16) 0 3px,transparent 3px 16px),radial-gradient(120% 120% at 20% 0,#d69a68,transparent 60%),linear-gradient(160deg,#b87c4c,#6f3f22)}
+.spec-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,12,.05) 30%,rgba(20,16,12,.86) 100%)}
+.sc-body{position:relative;z-index:2;padding:28px 30px;color:#fff}
+.sc-tag{display:inline-block;font-family:'Oswald';text-transform:uppercase;letter-spacing:.12em;font-size:11px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(4px);padding:5px 12px;border-radius:999px;margin-bottom:12px}
+.spec-card h3{font-family:'Oswald';text-transform:uppercase;font-size:clamp(26px,2.6vw,34px);color:#fff;line-height:1.05}
+.sc-body p{color:rgba(255,255,255,.9);font-size:14.5px;line-height:1.5;max-width:28em;margin:10px 0 14px}
+.sc-go{font-family:'Oswald';text-transform:uppercase;letter-spacing:.04em;font-size:14px;font-weight:600;color:#fff;border-bottom:2px solid rgba(255,255,255,.55);padding-bottom:2px;transition:border-color .2s}
+.spec-card:hover .sc-go{border-color:#fff}
+@media(max-width:760px){.spec-grid{grid-template-columns:1fr}.spec-card{min-height:240px}}
+
 
 /* товары */
 .prods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}

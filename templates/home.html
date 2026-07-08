@@ -36,6 +36,32 @@
 
 <div class="ruler"></div>
 
+<section class="species">
+  <div class="wrap">
+    <div class="sec-head reveal"><div><span class="eyebrow">Породы древесины</span><h2>Выберите породу под задачу</h2></div><a class="link" href="{% url 'catalog:index' %}">Весь каталог →</a></div>
+    <div class="spec-grid">
+      <a class="spec-card sc-pine reveal" href="{% url 'catalog:index' %}?spec=pine_spruce">
+        <div class="sc-body">
+          <span class="sc-tag">Хвоя</span>
+          <h3>Сосна и ель</h3>
+          <p>Универсально и выгодно: доска, брус, вагонка, погонаж. Тёплое лёгкое дерево для стройки и отделки — самый ходовой материал.</p>
+          <span class="sc-go">Смотреть хвою →</span>
+        </div>
+      </a>
+      <a class="spec-card sc-larch reveal" href="{% url 'catalog:index' %}?spec=larch">
+        <div class="sc-body">
+          <span class="sc-tag">Премиум</span>
+          <h3>Лиственница</h3>
+          <p>Прочная и стойкая к влаге — для террас, фасадов и пола. Благородная текстура, служит десятилетиями без гниения.</p>
+          <span class="sc-go">Смотреть лиственницу →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="ruler"></div>
+
 {% if popular_products %}
 <section>
   <div class="wrap">

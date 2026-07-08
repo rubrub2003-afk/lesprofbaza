@@ -188,8 +188,10 @@ def parse_larch(ws):
             if not price:
                 continue
             size = f"{th} × {wd}" if wd else f"{th}"
-            desc = "Цены по сортам (₽/м²): " + ", ".join(
-                f"{k} — {num(v)}" for k, v in sorts.items() if num(v))
+            rows = "".join(f"<tr><td>{k}</td><td>{num(v):,} ₽</td></tr>".replace(",", " ")
+                           for k, v in sorts.items() if num(v))
+            desc = ('<p class="sortnote">Цена зависит от сорта древесины (за м²):</p>'
+                    '<table class="sorts"><tr><th>Сорт</th><th>Цена</th></tr>' + rows + '</table>')
             out.append(dict(base=base, group=group, standard="", grade="Прима",
                             size=size, price=price, unit="m2", species=species,
                             thickness=th, width=wd, length=None, desc=desc))
