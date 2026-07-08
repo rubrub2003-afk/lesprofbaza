@@ -24,6 +24,8 @@ class SiteSettings(models.Model):
     map_embed = models.TextField("Код карты (iframe Яндекс/OSM)", blank=True)
     yandex_maps_url = models.CharField("Ссылка «Открыть в Яндекс.Картах»", max_length=300, blank=True)
 
+    catalog_version = models.CharField("Версия каталога (служебное)", max_length=40, blank=True, default="")
+
     # тумблеры отображения
     show_product_reviews = models.BooleanField("Показывать отзывы на товары", default=True)
     show_product_rating = models.BooleanField("Показывать рейтинг товаров", default=True)

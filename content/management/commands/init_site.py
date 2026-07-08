@@ -12,15 +12,19 @@ class Command(BaseCommand):
     help = "Наполнить сайт данными при первом запуске (идемпотентно)"
 
     def handle(self, *args, **opts):
+        # Версия каталога: при её смене прайс перезагружается на деплое.
+        CATALOG_VERSION = "2026-07-price-larch-sorts-1"
+        from content.models import SiteSettings
         price = Path(settings.BASE_DIR) / "data" / "price.xlsx"
-        # (пере)импортируем, если новый каталог (с лиственницей) ещё не загружен
-        need_import = not Product.objects.filter(species="larch").exists()
-        if need_import and price.exists():
-            call_command("import_price", str(price))
-        elif not price.exists():
+        ss = SiteSettings.load()
+        if not price.exists():
             self.stdout.write(self.style.WARNING("Файл прайса не найден: " + str(price)))
+        elif ss.catalog_version != CATALOG_VERSION or not Product.objects.exists():
+            call_command("import_price", str(price))
+            ss.catalog_version = CATALOG_VERSION
+            ss.save()
         else:
-            self.stdout.write("Новый каталог уже загружен — импорт пропущен.")
+            self.stdout.write("Каталог актуален — импорт пропущен.")
         call_command("seed_demo")
         self._ensure_admin()
         self.stdout.write(self.style.SUCCESS("Сайт инициализирован."))
