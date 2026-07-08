@@ -38,7 +38,7 @@
       <div class="ph">
         <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
         <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
-        <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="removeFav('{{ p.slug }}')" title="Убрать из избранного">♥</div>
+        <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="removeFav('{{ p.slug }}',event)" title="Убрать из избранного">♥</div>
       </div>
       <div class="body">
         <div class="dimrow num">{{ p.dimensions }}{% if p.standard %} · {{ p.standard }}{% endif %}</div>
@@ -63,7 +63,7 @@
 <footer><div class="wrap"><span>© 2026 {{ site.company_name }} · Москва и МО</span><span><a href="{% url 'content:home' %}">На главную</a></span></div></footer>
 
 <script>window.CSRF="{{ csrf_token }}";
-function removeFav(slug){try{var a=JSON.parse(localStorage.getItem('lpb_fav'))||[];var i=a.indexOf(slug);if(i>-1)a.splice(i,1);localStorage.setItem('lpb_fav',JSON.stringify(a));location.href='/catalog/favorites/?items='+a.map(encodeURIComponent).join(',');}catch(e){location.reload();}}
+function removeFav(slug,ev){if(ev){ev.preventDefault();ev.stopPropagation();}try{var a=JSON.parse(localStorage.getItem('lpb_fav'))||[];var i=a.indexOf(slug);if(i>-1)a.splice(i,1);localStorage.setItem('lpb_fav',JSON.stringify(a));location.href='/catalog/favorites/?items='+a.map(encodeURIComponent).join(',');}catch(e){location.reload();}}
 </script>
 {% include '_search.html' %}
 <script src="{% static 'js/shop.js' %}"></script>
