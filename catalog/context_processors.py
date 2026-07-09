@@ -14,4 +14,5 @@ def catalog_menu(request):
                     for p in Product.objects.filter(is_active=True).only("name", "slug", "price", "unit")]
     search_cats = [{"n": g.name, "u": g.get_absolute_url()} for g in groups]
     return {"catalog_groups": groups, "cart_count": cart_count,
-            "search_items": search_items, "search_cats": search_cats}
+            "search_items": search_items, "search_cats": search_cats,
+            "products_count": len(search_items)}

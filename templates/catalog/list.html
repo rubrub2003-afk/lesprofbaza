@@ -65,7 +65,7 @@
             <h3>{{ p.name }}</h3>
             <div class="meta">{{ p.get_species_display }}{% if p.grade %} · {{ p.grade }}{% endif %}</div>
             <div class="price">{% if p.old_price %}<span class="old num">{{ p.old_price|floatformat:0|intcomma }} ₽</span>{% endif %}<b class="num">{{ p.price|floatformat:0|intcomma }}</b><span class="unit">{{ p.get_unit_display }}</span>{% if p.discount %}<span class="off">−{{ p.discount }}%</span>{% endif %}</div>
-            {% if p.price_per_piece %}<div class="hint">≈ {{ p.price_per_piece|intcomma }} ₽ за штуку</div>{% endif %}
+            <div class="cline">{% if p.price_per_piece %}≈ {{ p.price_per_piece|intcomma }} ₽ за штуку{% endif %}</div>
             <div class="actions"><button class="btn btn-forest" onclick="addCart('{{ p.slug }}',1,this,event)">В корзину</button><a class="btn btn-fast" href="{{ p.get_absolute_url }}">Быстрый заказ</a></div>
           </div>
         </article>

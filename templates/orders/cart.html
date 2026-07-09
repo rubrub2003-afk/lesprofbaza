@@ -24,7 +24,7 @@
 {% elif not items %}
 <div class="wrap"><div style="text-align:center;padding:70px 20px">
   <h1 class="page" style="font-size:30px">Корзина пуста</h1>
-  <p style="color:var(--ink-soft);margin-bottom:20px">Загляните в каталог — там 111 позиций.</p>
+  <p style="color:var(--ink-soft);margin-bottom:20px">Загляните в каталог — там {{ products_count }} позиций.</p>
   <a class="btn" style="display:inline-block;max-width:260px;text-align:center;line-height:54px;text-decoration:none" href="{% url 'catalog:index' %}">Перейти в каталог</a>
 </div></div>
 {% else %}
