@@ -57,7 +57,12 @@
       .then(function(r){return r.json();})
       .then(function(d){if(d&&typeof d.count!=='undefined'){updateCount(d.count);fly(srcEl);toast('Товар в корзине');}})
       .catch(function(){window.location='/cart/';});};
-  function updateCount(n){document.querySelectorAll('.cart span').forEach(function(s){s.textContent=n;});}
+  function updateCount(n){
+    document.querySelectorAll('.iconbtn.cart, a.cart').forEach(function(a){
+      var s=a.querySelector('span'); if(!s){s=document.createElement('span');a.appendChild(s);}
+      s.textContent=n;
+    });
+  }
   function fly(srcEl){
     var cart=document.querySelector('.iconbtn.cart');
     if(!srcEl||!cart){return;}

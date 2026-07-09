@@ -162,6 +162,8 @@ def reorder(request, pk):
     cart = request.session.get("cart", {})
     for it in order.items.select_related("product").all():
         p = it.product
+        if not p:
+            p = Product.objects.filter(name=it.name, is_active=True).first()
         if p and p.is_active:
             cart[p.slug] = cart.get(p.slug, 0) + it.qty
     request.session["cart"] = cart

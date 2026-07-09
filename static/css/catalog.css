@@ -27,7 +27,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:6px 0 22px;flex-wrap:wrap}
 .page-h h1{font-size:clamp(26px,3.4vw,40px)}.page-h .cnt{color:var(--ink-soft);font-size:14px}
 /* раскладка */
-.layout{display:grid;grid-template-columns:264px minmax(0,1fr);gap:26px;padding-bottom:60px}
+.layout{display:grid;grid-template-columns:264px minmax(0,1fr);gap:26px;padding-bottom:60px;width:100%}
 .filters{align-self:start;min-width:0;position:sticky;top:90px;max-height:calc(100vh - 108px);overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
 .filters .fg{border-bottom:1px solid var(--line);padding:14px 0}.filters .fg:first-child{padding-top:0}.filters .fg:last-child{border-bottom:0}
 .filters h4{font-family:'Oswald';text-transform:uppercase;font-size:13px;letter-spacing:.04em;margin-bottom:12px}
@@ -60,11 +60,11 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .stock.order{color:#9a3b2e}
 .card .body{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
 .card .dimrow{font-family:'Oswald';font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
-.card h3{font-family:'Manrope';font-weight:700;text-transform:none;font-size:15.5px;line-height:1.3;overflow-wrap:break-word}
+.card h3{font-family:'Manrope';font-weight:700;text-transform:none;font-size:15.5px;line-height:1.3;overflow-wrap:break-word;min-height:2.6em}
 .card .meta{font-size:12.5px;color:var(--ink-soft)}
 .card .price{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
 .card .price .old{text-decoration:line-through;color:#A99B82;font-size:13px}
-.card .price b{font-family:'Oswald';font-size:22px}.card .price .unit{font-size:12.5px;color:var(--ink-soft)}
+.card .price b{font-family:'Oswald';font-size:22px}.card .price .unit{font-size:12.5px;color:var(--ink-soft)}.card .price .off{align-self:center;background:#9a3b2e;color:#fff;font-family:'Oswald';font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;letter-spacing:.04em}
 .card .actions{display:flex;gap:8px;margin-top:auto;padding-top:10px}
 .card .selling{font-size:11.5px;font-weight:700;color:var(--forest);display:flex;align-items:center;gap:6px}.card .selling::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--forest)}.card .hint{font-size:11.5px;color:#8a7c66}
 .btn{font-family:'Manrope';font-weight:700;font-size:12px;border:0;border-radius:999px;padding:11px 6px;cursor:pointer;flex:1;text-align:center;white-space:nowrap;transition:background .2s,border-color .2s,transform .15s}
