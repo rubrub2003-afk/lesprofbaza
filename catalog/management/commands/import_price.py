@@ -224,14 +224,17 @@ def parse_osb(ws):
     out = []
     for r in ws.iter_rows(values_only=True):
         cells = [(str(c).strip() if c is not None else '') for c in r]
-        A, B, C = cells[0], cells[1], cells[2]
-        if re.match(r'^\d+$', A) and B and C:
-            th = int(A)
-            m = re.search(r'\d[\d\s]*', C)
-            price = int(m.group().replace(' ', '')) if m else None
-            if not price:
-                continue
-            sheet = B.replace('x', '×').replace('X', '×').replace('х', '×').strip()
+        th = size = price = None
+        for c in cells:
+            cc = c.replace(' ', '')
+            if th is None and re.fullmatch(r'\d{1,2}', cc):
+                th = int(cc); continue
+            if size is None and re.search(r'[x×х]', c) and re.search(r'\d', c):
+                size = c; continue
+            if price is None and re.fullmatch(r'\d{3,6}', cc):
+                price = int(cc)
+        if th and size and price:
+            sheet = size.replace('x', '×').replace('X', '×').replace('х', '×').strip()
             out.append(dict(base="OSB-плита", group="Плиты", standard="", grade="",
                             size=f"{th} мм", size_text=f"лист {sheet} м",
                             price=price, unit="sheet", species="other",
@@ -254,7 +257,8 @@ class Command(BaseCommand):
         wb = openpyxl.load_workbook(path, data_only=True)
         soft = parse_softwood(wb["Сосна и ель"])
         larch = parse_larch(wb["Лиственница"])
-        osb = parse_osb(wb["Sheet3"]) if "Sheet3" in wb.sheetnames else []
+        osb_sheet = next((n for n in wb.sheetnames if "osb" in n.lower()), None)
+        osb = parse_osb(wb[osb_sheet]) if osb_sheet else []
         items = soft + larch + osb
         # финальные поля
         for it in items:

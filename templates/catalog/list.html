@@ -6,13 +6,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}">
-<style>.search{position:relative}.suggest{position:absolute;top:50px;left:0;right:0;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:none;z-index:60}.suggest.show{display:block}.suggest a{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;font-size:14px;border-bottom:1px solid var(--line)}.suggest a:last-child{border-bottom:0}.suggest a:hover{background:var(--sand)}.suggest .pr{color:var(--ink-soft);font-size:12.5px;white-space:nowrap}.suggest a.catrow{background:rgba(39,74,54,.06)}.suggest a.catrow .pr{color:var(--forest);font-weight:700}.suggest .empty{padding:12px 16px;color:var(--ink-soft);font-size:13.5px}.back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}.cmp.on{background:var(--forest)!important;color:#fff!important}.card.cmp-selected{outline:2px solid var(--forest);outline-offset:-2px}</style>
+<style>.search{position:relative}.suggest{position:absolute;top:50px;left:0;right:0;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:none;z-index:60}.suggest.show{display:block}.suggest a{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;font-size:14px;border-bottom:1px solid var(--line)}.suggest a:last-child{border-bottom:0}.suggest a:hover{background:var(--sand)}.suggest .pr{color:var(--ink-soft);font-size:12.5px;white-space:nowrap}.suggest a.catrow{background:rgba(39,74,54,.06)}.suggest a.catrow .pr{color:var(--forest);font-weight:700}.suggest .empty{padding:12px 16px;color:var(--ink-soft);font-size:13.5px}.back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}.cmp.on{background:var(--forest)!important;color:#fff!important}.card.cmp-selected{outline:2px solid var(--forest);outline-offset:-2px}.catrow{display:flex;align-items:center;justify-content:space-between;gap:6px}.catrow .chk{margin:6px 0;flex:1}.expand{background:none;border:0;cursor:pointer;color:var(--ink-soft);font-size:12px;padding:4px 6px;transition:transform .2s;line-height:1}.expand.open{transform:rotate(90deg);color:var(--forest)}.subs{display:none;padding-left:16px;border-left:2px solid var(--line);margin:2px 0 6px 6px}.subs.open{display:block}.chk-sub{font-size:13px;margin:5px 0;color:var(--ink-soft)}#qbanner{background:rgba(39,74,54,.06);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:0 0 16px;font-size:14px}#qbanner a{color:var(--forest);font-weight:700}</style>
 </head>
 <body>
 <div class="topbar"><div class="wrap"><span>Москва и Московская область · доставка круглосуточно</span><span><a href="{% url 'content:page' 'dostavka-i-oplata' %}">Доставка и оплата</a> · <a href="{% url 'content:page' 'dlya-yurlic' %}">Для юрлиц</a> · <a href="{% url 'content:page' 'kontakty' %}">Контакты</a></span></div></div>
 <header class="head"><div class="wrap">
   <a class="logo" href="{% url 'content:home' %}"><img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА"><span><span class="name">{{ site.company_name }}</span><span class="tag">пиломатериалы · Москва и МО</span></span></a>
-  <form class="search" onsubmit="return false" autocomplete="off"><input id="searchInput" type="text" placeholder="Поиск: доска, брус, вагонка…"><button><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><div class="suggest" id="suggest"></div></form>
+  <form class="search" action="{% url 'catalog:index' %}" method="get" autocomplete="off"><input id="searchInput" name="q" type="text" placeholder="Поиск: доска, брус, вагонка…"><button><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button><div class="suggest" id="suggest"></div></form>
   <div class="head-actions">
     <a class="iconbtn favlink" href="{% url 'catalog:favorites' %}" title="Избранное"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="favn" style="display:none">0</span></a>
     <a class="iconbtn" href="{% url 'orders:account' %}" title="Кабинет"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a>
@@ -23,11 +23,18 @@
 <div class="wrap">
   <div class="crumbs"><a href="{% url 'content:home' %}">Главная</a> / {% if current_category %}<a href="{% url 'catalog:index' %}">Каталог</a> / {{ current_category.name }}{% else %}Каталог{% endif %}</div>
   <div class="page-h"><h1>{{ title }}</h1><span class="cnt" id="cnt">Показано {{ products|length }} из {{ products|length }}</span></div>
+  <div id="qbanner" style="display:none"></div>
 
   <div class="layout">
     <aside class="filters">
       <div class="fg"><h4>Категории</h4>
-        {% for g in catalog_groups %}<label class="chk"><input type="checkbox" class="fcat" value="{{ g.slug }}">{{ g.name }}</label>{% endfor %}
+        {% for g in catalog_groups %}
+        <div class="catrow">
+          <label class="chk"><input type="checkbox" class="fcat" value="{{ g.slug }}" data-group="{{ g.slug }}">{{ g.name }}</label>
+          {% if g.children.all %}<button type="button" class="expand" onclick="toggleSub(this)" aria-label="Раскрыть">▸</button>{% endif %}
+        </div>
+        {% if g.children.all %}<div class="subs">{% for sub in g.children.all %}<label class="chk chk-sub"><input type="checkbox" class="fsub" value="{{ sub.slug }}" data-group="{{ g.slug }}">{{ sub.name }}</label>{% endfor %}</div>{% endif %}
+        {% endfor %}
       </div>
       {% if species_list %}<div class="fg"><h4>Порода</h4>
         {% for code, name in species_list %}<label class="chk"><input type="checkbox" class="fspec" value="{{ code }}">{{ name }}</label>{% endfor %}
@@ -54,7 +61,7 @@
 
       <div class="prods" id="prods">
         {% for p in products %}
-        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}">
+        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}" data-subcat="{{ p.category.slug }}" data-name="{{ p.name|lower }}">
           <div class="ph has-img" style="background-image:url('{% static p.image_path %}')">
             <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
             <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
@@ -84,10 +91,13 @@
 var cards=[].slice.call(document.querySelectorAll('#prods .card'));
 var FKEY='lpb_filters';
 var PAGE=1, PAGE_SIZE=24;
+var QP=new URLSearchParams(location.search);
+var QTOKENS=(QP.get('q')||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
 function sel(q){return [].slice.call(document.querySelectorAll(q+':checked')).map(function(c){return c.value;});}
-function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),labels:sel('.flabel'),species:sel('.fspec'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
+function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),subs:sel('.fsub'),labels:sel('.flabel'),species:sel('.fspec'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
 function applyF(){
-  var cats=sel('.fcat'),labels=sel('.flabel'),species=sel('.fspec'),stocks=sel('.fstock');
+  var cats=sel('.fcat'),subs=sel('.fsub'),labels=sel('.flabel'),species=sel('.fspec'),stocks=sel('.fstock');
+  var gWithSub={}; document.querySelectorAll('.fsub:checked').forEach(function(e){gWithSub[e.dataset.group]=true;});
   var pmin=parseFloat(document.getElementById('pmin').value)||0;
   var pmax=parseFloat(document.getElementById('pmax').value)||1e12;
   var shown=0;
@@ -95,7 +105,11 @@ function applyF(){
     var cl=(c.dataset.labels||'').trim().split(/\s+/);
     var okLabel=!labels.length||labels.some(function(id){return cl.indexOf(id)>-1;});
     var okSpec=!species.length||species.indexOf(c.dataset.species)>-1;
-    var ok=(!cats.length||cats.indexOf(c.dataset.cat)>-1)&&okLabel&&okSpec&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
+    var okCat;
+    if(!cats.length && !subs.length){ okCat=true; }
+    else { okCat=(subs.indexOf(c.dataset.subcat)>-1) || (cats.indexOf(c.dataset.cat)>-1 && !gWithSub[c.dataset.cat]); }
+    var okQ=!QTOKENS.length||QTOKENS.every(function(t){return (c.dataset.name||'').indexOf(t)>-1;});
+    var ok=okCat&&okQ&&okLabel&&okSpec&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
     c.style.display=ok?'':'none'; if(ok)shown++;
   });
   var sv=document.getElementById('sort').value, box=document.getElementById('prods');
@@ -125,16 +139,26 @@ function renderPager(pages){
 }
 function gotoPage(n){PAGE=Math.max(1,n);applyF();window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('.fcat,.flabel,.fspec,.fstock').forEach(function(c){c.addEventListener('change',function(){PAGE=1;applyF();});});
+document.querySelectorAll('.fsub').forEach(function(c){c.addEventListener('change',function(){
+  var g=c.dataset.group, any=document.querySelectorAll('.fsub[data-group="'+g+'"]:checked').length>0;
+  var gc=document.querySelector('.fcat[value="'+g+'"]'); if(gc)gc.checked=any;
+  PAGE=1;applyF();
+});});
+function toggleSub(btn){var subs=btn.closest('.catrow').nextElementSibling; if(subs&&subs.classList.contains('subs')){subs.classList.toggle('open');btn.classList.toggle('open');}}
 document.getElementById('pmin').addEventListener('input',function(){PAGE=1;applyF();});document.getElementById('pmax').addEventListener('input',function(){PAGE=1;applyF();});
-function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
+function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.querySelectorAll('.subs.open,.expand.open').forEach(function(e){e.classList.remove('open');});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
 (function(){
-  var params=new URLSearchParams(location.search), cat=params.get('cat'), spec=params.get('spec');
+  var params=new URLSearchParams(location.search), cat=params.get('cat'), spec=params.get('spec'), q=params.get('q');
+  if(q){
+    var qb=document.getElementById('qbanner'); if(qb){qb.style.display='block';qb.innerHTML='Результаты по запросу «<b>'+q.replace(/</g,'&lt;')+'</b>». <a href="'+location.pathname+'">Сбросить поиск</a>';}
+  }
   if(cat||spec){
     if(cat){var cb=document.querySelector('.fcat[value="'+cat+'"]');if(cb)cb.checked=true;}
     if(spec){var sb=document.querySelector('.fspec[value="'+spec+'"]');if(sb)sb.checked=true;}
   }
-  else{try{var st=JSON.parse(localStorage.getItem(FKEY));if(st){
+  else if(!q){try{var st=JSON.parse(localStorage.getItem(FKEY));if(st){
     (st.cats||[]).forEach(function(v){var e=document.querySelector('.fcat[value="'+v+'"]');if(e)e.checked=true;});
+    (st.subs||[]).forEach(function(v){var e=document.querySelector('.fsub[value="'+v+'"]');if(e){e.checked=true;var sw=e.closest('.subs');if(sw){sw.classList.add('open');var pv=sw.previousElementSibling;if(pv){var ex=pv.querySelector('.expand');if(ex)ex.classList.add('open');}}}});
     (st.labels||[]).forEach(function(v){var e=document.querySelector('.flabel[value="'+v+'"]');if(e)e.checked=true;});
     (st.species||[]).forEach(function(v){var e=document.querySelector('.fspec[value="'+v+'"]');if(e)e.checked=true;});
     (st.stocks||[]).forEach(function(v){var e=document.querySelector('.fstock[value="'+v+'"]');if(e)e.checked=true;});

@@ -1,9 +1,12 @@
 """Меню категорий, счётчик корзины и данные для живого поиска — во всех шаблонах."""
+from django.db.models import Prefetch
 from .models import Category, Product
 
 
 def catalog_menu(request):
-    groups = (Category.objects.filter(parent__isnull=True, is_active=True).prefetch_related("children"))
+    groups = (Category.objects.filter(parent__isnull=True, is_active=True).order_by("name")
+              .prefetch_related(Prefetch("children",
+                  queryset=Category.objects.filter(is_active=True).order_by("name"))))
     cart = request.session.get("cart", {})
     cart_count = sum(cart.values()) if cart else 0
 

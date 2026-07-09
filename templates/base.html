@@ -21,8 +21,8 @@
     <img class="mark" style="width:auto;height:48px" src="{% static 'img/emblem.png' %}" alt="ЛЕСПРОФБАЗА">
     <span class="txt"><span class="name">{{ site.company_name }}</span><span class="tag">пиломатериалы · Москва и МО</span></span>
   </a>
-  <form class="search" onsubmit="return false" autocomplete="off" role="search">
-    <input id="searchInput" type="text" placeholder="Поиск: доска, брус, вагонка…" aria-label="Поиск по сайту">
+  <form class="search" action="{% url 'catalog:index' %}" method="get" autocomplete="off" role="search">
+    <input id="searchInput" name="q" type="text" placeholder="Поиск: доска, брус, вагонка…" aria-label="Поиск по сайту">
     <button type="submit" aria-label="Искать"><svg class="ico-s" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></button>
     <div class="suggest" id="suggest"></div>
   </form>
