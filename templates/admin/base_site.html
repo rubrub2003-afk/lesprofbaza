@@ -58,6 +58,20 @@
     if(/\/orders\/order\/$/.test(p)) markSeen('orders');
     else if(/\/orders\/lead\/$/.test(p)) markSeen('leads');
     else if(/\/catalog\/review\/$/.test(p)) markSeen('reviews');
+    // верхний горизонтальный ползунок для широких таблиц списка
+    (function(){
+      var res=document.querySelector('#changelist .results');
+      if(!res) return;
+      var top=document.createElement('div');
+      top.style.cssText='overflow-x:auto;overflow-y:hidden;margin-bottom:4px';
+      var inner=document.createElement('div'); inner.style.height='1px';
+      top.appendChild(inner); res.parentNode.insertBefore(top,res);
+      function sync(){ inner.style.width=res.scrollWidth+'px'; }
+      sync(); window.addEventListener('resize',sync); setTimeout(sync,400);
+      var lock=false;
+      top.addEventListener('scroll',function(){ if(lock)return; lock=true; res.scrollLeft=top.scrollLeft; lock=false; });
+      res.addEventListener('scroll',function(){ if(lock)return; lock=true; top.scrollLeft=res.scrollLeft; lock=false; });
+    })();
     var ram=document.getElementById('recent-actions-module');
     if(ram){var h=ram.querySelector('h2,h3');
       if(h && !h.querySelector('.lpb-clear')){

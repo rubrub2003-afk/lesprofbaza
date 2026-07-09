@@ -119,6 +119,44 @@ class Product(models.Model):
         return reverse("catalog:product", args=[self.slug])
 
     @property
+    def image_path(self):
+        """Статичная картинка-текстура по типу материала (fallback, если нет фото)."""
+        n = (self.category.name if self.category_id else "").lower()
+        sp = self.species
+
+        def h(*ks):
+            return any(k in n for k in ks)
+        if self.unit == "sheet" or "osb" in n:
+            fam = "osb"
+        elif h("вагонк"):
+            fam = "larch" if sp == "larch" else "vagonka"
+        elif h("блок"):
+            fam = "blokhaus"
+        elif h("планкен"):
+            fam = "larch" if sp == "larch" else "planken"
+        elif h("имитац"):
+            fam = "larch" if sp == "larch" else "imitaciya"
+        elif h("половая", "террас"):
+            fam = "larch" if sp == "larch" else "polovaya"
+        elif h("обрезная"):
+            fam = "larch_doska" if sp == "larch" else "doska"
+        elif h("строганная", "доска"):
+            fam = "doska"
+        elif h("брус клееный"):
+            fam = "brus"
+        elif h("рейка", "брусок"):
+            fam = "brusok"
+        elif h("плинтус", "уголок", "полувалик", "штапик", "раскладка", "наличник"):
+            fam = "pogonazh"
+        elif h("щит"):
+            fam = "shchit"
+        elif h("перила", "столб", "балясина", "тетива"):
+            fam = "lestnica"
+        else:
+            fam = "default"
+        return "img/products/" + fam + ".jpg"
+
+    @property
     def dimensions(self):
         if self.size_text:
             return self.size_text

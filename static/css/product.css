@@ -21,7 +21,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .crumbs{font-size:13px;color:var(--ink-soft);padding:18px 0}.crumbs a:hover{color:var(--forest)}
 /* верх карточки */
 .top{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;padding-bottom:40px}
-.gallery .main{height:420px;border-radius:var(--radius);background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.gallery .main{height:420px;border-radius:var(--radius);background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden;box-shadow:var(--shadow)}.gallery .main.has-img{background-size:cover;background-position:center}.gallery .main.has-img::before{display:none}
 .gallery .main::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.16) 0 4px,transparent 4px 16px)}
 .gallery .main .cap{position:absolute;left:14px;bottom:12px;color:rgba(255,255,255,.8);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-family:'Oswald'}
 .gallery .badge{position:absolute;top:14px;left:14px;right:auto;bottom:auto;background:var(--pine);color:#fff;font-family:'Oswald';text-transform:uppercase;font-size:12px;padding:5px 11px;border-radius:6px;z-index:2}

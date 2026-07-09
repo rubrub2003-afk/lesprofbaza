@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load humanize %}
+{% extends "base.html" %}{% load humanize static %}
 {% block content %}
 <section class="hero" style="padding-top:0">
   <div class="wrap">
@@ -68,7 +68,7 @@
     <div class="prods">
       {% for p in popular_products %}
       <article class="card reveal" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'">
-        <div class="ph">
+        <div class="ph has-img" style="background-image:url('{% static p.image_path %}')">
           <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
           <span class="stock">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
           <div class="cmp" data-cmp-slug="{{ p.slug }}" onclick="toggleCmp('{{ p.slug }}',event)" title="Сравнить">⇄</div><div class="fav" data-fav-slug="{{ p.slug }}" onclick="toggleFav('{{ p.slug }}',event)" title="В избранное">♡</div>

@@ -5,7 +5,7 @@ from .models import StaticPage, FAQ
 
 
 def home(request):
-    popular = list(Product.objects.filter(is_active=True, is_popular=True).prefetch_related("labels")[:4])
+    popular = list(Product.objects.filter(is_active=True, is_popular=True).select_related("category").prefetch_related("labels")[:4])
     for p in popular:
         if p.old_price and p.old_price > p.price:
             p.discount = round((float(p.old_price) - float(p.price)) / float(p.old_price) * 100)

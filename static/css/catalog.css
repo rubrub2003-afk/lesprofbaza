@@ -47,7 +47,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .prods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .3s}
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
-.card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
+.card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}.card .ph.has-img{background-size:cover;background-position:center}.card .ph.has-img::before{display:none}
 .card .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 14px);transition:transform .4s}
 .card:hover .ph::before{transform:scale(1.06)}
 .card .ph .fav,.card .ph .cmp{position:absolute;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(251,247,239,.92);display:grid;place-items:center;color:var(--ink-soft);cursor:pointer;z-index:3;transition:color .2s,transform .15s}
@@ -65,7 +65,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .card .price{margin-top:auto;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
 .card .price .old{text-decoration:line-through;color:#A99B82;font-size:13px}
 .card .price b{font-family:'Oswald';font-size:22px}.card .price .unit{font-size:12.5px;color:var(--ink-soft)}.card .price .off{align-self:center;background:#9a3b2e;color:#fff;font-family:'Oswald';font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;letter-spacing:.04em}
-.card .actions{display:flex;gap:8px;margin-top:auto;padding-top:10px}
+.card .actions{display:flex;gap:8px;padding-top:10px}
 .card .selling{font-size:11.5px;font-weight:700;color:var(--forest);display:flex;align-items:center;gap:6px}.card .selling::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--forest)}.card .hint{font-size:11.5px;color:#8a7c66}.card .cline{min-height:15px;font-size:11.5px;color:#8a7c66;margin-top:3px}
 .btn{font-family:'Manrope';font-weight:700;font-size:12px;border:0;border-radius:999px;padding:11px 6px;cursor:pointer;flex:1;text-align:center;white-space:nowrap;transition:background .2s,border-color .2s,transform .15s}
 .btn-forest{background:var(--forest);color:#fff}.btn-forest:hover{background:var(--forest-2);transform:translateY(-1px)}

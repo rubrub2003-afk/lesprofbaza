@@ -30,7 +30,7 @@
   <div class="crumbs"><a href="#" onclick="history.back();return false" style="color:var(--forest);font-weight:700;margin-right:10px">← Назад</a><a href="{% url 'content:home' %}">Главная</a> / <a href="{% url 'catalog:index' %}">Каталог</a> / {% if product.category.parent %}<a href="{{ product.category.parent.get_absolute_url }}">{{ product.category.parent.name }}</a> / {% endif %}{{ product.name }}</div>
   <div class="top">
     <div class="gallery">
-      <div class="main">{% for l in product.labels.all %}{% if forloop.first %}<span class="badge">{{ l.name }}</span>{% endif %}{% endfor %}<span class="cap" id="mainCap">Фото товара</span></div>
+      <div class="main has-img" style="background-image:url('{% static product.image_path %}')">{% for l in product.labels.all %}{% if forloop.first %}<span class="badge">{{ l.name }}</span>{% endif %}{% endfor %}</div>
       <div class="thumbs"><div class="on"></div><div></div><div></div><div></div></div>
     </div>
     <div class="info">
