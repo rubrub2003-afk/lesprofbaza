@@ -115,15 +115,15 @@ def parse_softwood(ws):
                 t=th, w=wd, l=3000)
         elif section == "МЕБЕЛЬНЫЙ ЩИТ":
             if "клееный брус" in sub:
-                add(out, "Брус клееный", "Брус и брусок", G, p, u, grade="сучковый", t=t, w=w, l=l)
+                add(out, "Брус клееный", "Брус и брусок", G, p, u, grade="Сучковый", t=t, w=w, l=l)
             elif "тетива" in sub:
-                add(out, "Тетива", "Элементы лестниц", G, p, u, grade="сучковый", t=t, w=w, l=l)
+                add(out, "Тетива", "Элементы лестниц", G, p, u, grade="Сучковый", t=t, w=w, l=l)
             elif "перила" in sub:
-                add(out, "Перила", "Элементы лестниц", G, p, u, grade="без сучковый", size_text=G)
+                add(out, "Перила", "Элементы лестниц", G, p, u, grade="Без сучковый", size_text=G)
             elif "столб" in sub:
-                add(out, "Столб", "Элементы лестниц", G, p, u, grade="без сучковый", t=t, w=w, l=l)
+                add(out, "Столб", "Элементы лестниц", G, p, u, grade="Без сучковый", t=t, w=w, l=l)
             elif "балясина" in sub:
-                add(out, "Балясина", "Элементы лестниц", G, p, u, grade="без сучковый", t=t, w=w, l=l)
+                add(out, "Балясина", "Элементы лестниц", G, p, u, grade="Без сучковый", t=t, w=w, l=l)
             else:
                 # Сучковые: '18 × 200, 300, 400, 500, 600 × 3' → по каждой ширине
                 mm = re.match(r'\s*(\d+)\s*×\s*([\d,\s]+?)\s*×\s*(\d+)', G)
@@ -132,11 +132,11 @@ def parse_softwood(ws):
                     widths = [int(x) for x in re.findall(r'\d+', mm.group(2))]
                     for wd in widths:
                         add(out, "Мебельный щит", "Мебельный щит",
-                            f"{th} × {wd} × {ln}", p, u, grade="сучковый",
+                            f"{th} × {wd} × {ln}", p, u, grade="Сучковый",
                             t=th, w=wd, l=ln * 1000)
                 else:
                     add(out, "Мебельный щит", "Мебельный щит", G, p, u,
-                        grade="сучковый", t=t, w=w, l=l)
+                        grade="Сучковый", t=t, w=w, l=l)
         elif section == "ВАГОНКА ШТИЛЬ":
             add(out, "Евровагонка" if "евровагонка" in sub else "Вагонка штиль",
                 "Вагонка", G, p, u, t=t, w=w, l=l)
@@ -155,7 +155,7 @@ def parse_softwood(ws):
                 add(out, "Планкен прямой", "Фасадные материалы", G, p, u, t=t, w=w, l=l)
         elif section and section.startswith("ДОСКА ОБРЕЗНАЯ"):
             std = ""; grade = ""
-            if "камерн" in sub: std = "камерная сушка"
+            if "камерн" in sub: std = "Камерная сушка"
             elif "гост" in sub: std = "ГОСТ"
             elif "ту" in sub: std = "ТУ"
             if "второй сорт" in sub: grade = "2 сорт"
@@ -188,8 +188,18 @@ LARCH_MATRIX = {
 
 
 def parse_larch(ws):
+    CYR2LAT = {'А': 'A', 'В': 'B', 'С': 'C', 'Д': 'D'}
+
+    def norm_sort(label):
+        label = re.sub(r'сорт', '', label, flags=re.I).strip()
+        if not label:
+            return ''
+        if label in ('Экстра', 'Прима'):
+            return label
+        return ''.join(CYR2LAT.get(ch, ch) for ch in label)
+
     out = []
-    targets = None; mode = None; cur_price = None
+    targets = None; mode = None; cur_price = None; cur_sorts = None
     for r in ws.iter_rows(values_only=True):
         c = [(str(x).strip() if x is not None else '') for x in r]
         C, D, E, F, G = c[2], c[3], c[4], c[5], c[6]
@@ -197,7 +207,7 @@ def parse_larch(ws):
         matched = False
         for key, val in LARCH_MATRIX.items():
             if key in low:
-                targets = val; mode = 'matrix'; matched = True; break
+                targets = val; mode = 'matrix'; cur_sorts = None; matched = True; break
         if matched:
             continue
         if "мебельный щит из лиственницы" in low:
@@ -206,20 +216,26 @@ def parse_larch(ws):
             mode = 'obrezn'; cur_price = None; continue
         if "клееный брус из" in low:
             mode = 'glue'; cur_price = None; continue
+        # строка-заголовок с сортами: запоминаем метки колонок
+        if mode == 'matrix' and 'сорт' in (E + F + G).lower():
+            cur_sorts = [norm_sort(x) for x in (c[4], c[5], c[6], c[7], c[8])]
+            continue
         if not re.match(r'^\d', C) or not D:
             continue
         th = int(re.search(r'\d+', C).group())
         wm = re.search(r'\d+', D); wd = int(wm.group()) if wm else None
 
         if mode == 'matrix':
-            sorts = {'Экстра': E, 'Прима': F, 'АВ/В': G, 'ВС/С': c[7], 'СД/Д': c[8]}
-            price = num(F) or num(E) or num(G)
-            if not price:
-                continue
-            desc = sort_table(sorts)
-            for base, group, sp in targets:
-                add(out, base, group, f"{th} × {wd} × 2–4 м", price, "m2",
-                    species=sp, grade="Прима", t=th, w=wd, desc=desc)
+            sorts = cur_sorts or ['Экстра', 'Прима', 'AB', 'BC', 'CD']
+            cols = [c[4], c[5], c[6], c[7], c[8]]
+            for sortlbl, cell in zip(sorts, cols):
+                pr = num(cell)
+                if not pr or not sortlbl:
+                    continue
+                for base, group, sp in targets:
+                    add(out, base, group, f"{th} × {wd} × 2–4 м", pr, "m2",
+                        species=sp, grade=sortlbl, t=th, w=wd)
+                    out[-1]['sort_in_name'] = True
         elif mode == 'obrezn':
             pr, _ = money(F)
             if pr:
@@ -237,8 +253,13 @@ def parse_larch(ws):
             price = num(G)
             if not price:
                 continue
-            add(out, "Мебельный щит лиственница", "Мебельный щит",
-                f"{th} × {D}", price, "m2", species="larch", grade=(F or "Сращенная"), t=th)
+            grade = F or "Сращенная"
+            widths = [int(x) for x in re.findall(r'\d+', D)]
+            if not widths:
+                widths = [wd]
+            for wdi in widths:
+                add(out, "Мебельный щит лиственница", "Мебельный щит",
+                    f"{th} × {wdi}", price, "m2", species="larch", grade=grade, t=th, w=wdi)
     return out
 
 
@@ -280,10 +301,27 @@ class Command(BaseCommand):
         osb = parse_osb(wb[osb_name]) if osb_name else []
         items = [it for it in (soft + larch + osb) if it["price"]]
 
+        # Сливаем лиственничные подкатегории в базовые (порода различается фильтром)
+        RENAME = {
+            "Брус клееный из лиственницы": "Брус клееный",
+            "Вагонка лиственница": "Вагонка",
+            "Доска обрезная лиственница": "Доска обрезная",
+            "Половая доска лиственница": "Половая доска",
+            "Мебельный щит лиственница": "Мебельный щит",
+            "Имитация бруса лиственница": "Имитация бруса",
+            "Террасная доска лиственница": "Террасная доска",
+        }
+        for it in items:
+            it["desc_key"] = it["base"]          # описание берём по исходному имени (по породе)
+            if it["base"] in RENAME:
+                it["base"] = RENAME[it["base"]]
+
         for it in items:
             name = f"{it['base']} {it['size']}"
             if it.get("standard"):
                 name += f", {it['standard']}"
+            if it.get("sort_in_name") and it.get("grade"):
+                name += f", сорт {it['grade']}"
             it["name"] = name
 
         from collections import Counter
@@ -380,7 +418,7 @@ class Command(BaseCommand):
                     species=it["species"], grade=it.get("grade", ""), standard=it.get("standard", ""),
                     thickness=it.get("thickness"), width=it.get("width"), length=it.get("length"),
                     size_text=it["size_text"], unit=it["unit"], price=it["price"],
-                    description=(to_html(DESC_MAP.get(it["base"], ""))
+                    description=(to_html(DESC_MAP.get(it.get("desc_key", it["base"]), ""))
                                  + (it["desc"] if "sorts" in it.get("desc", "") else "")
                                  + NOTE),
                     in_stock=True, is_active=True)

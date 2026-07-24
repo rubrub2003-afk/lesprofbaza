@@ -28,7 +28,7 @@
 
   <div class="layout">
     <aside class="filters">
-      <div class="fg"><h4>Категории</h4>
+      <div class="fg collapsible open"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Категории</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         {% for g in catalog_groups %}
         <div class="catrow">
           <label class="chk"><input type="checkbox" class="fcat" value="{{ g.slug }}" data-group="{{ g.slug }}">{{ g.name }}</label>
@@ -36,7 +36,7 @@
         </div>
         {% if g.children.all %}<div class="subs">{% for sub in g.children.all %}<label class="chk chk-sub"><input type="checkbox" class="fsub" value="{{ sub.slug }}" data-group="{{ g.slug }}">{{ sub.name }}</label>{% endfor %}</div>{% endif %}
         {% endfor %}
-      </div>
+      </div></div>
       {% if species_list %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Порода</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         {% for code, name in species_list %}<label class="chk"><input type="checkbox" class="fspec" value="{{ code }}">{{ name }}</label>{% endfor %}
       </div></div>{% endif %}
@@ -56,12 +56,18 @@
         <label class="chk"><input type="checkbox" class="fstock" value="in">В наличии</label>
         <label class="chk"><input type="checkbox" class="fstock" value="order">Под заказ</label>
       </div></div>
-      <div class="fg"><h4>Цена, ₽</h4>
-        <div class="price-row"><input id="pmin" type="number" placeholder="от" class="num"><span>—</span><input id="pmax" type="number" placeholder="до" class="num"></div>
-      </div>
+      <div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Толщина, мм</h4><span class="fg-caret">▸</span></button><div class="fg-body">
+        <div class="price-row"><input id="tmin" type="number" placeholder="от" class="num"><span>—</span><input id="tmax" type="number" placeholder="до" class="num"></div>
+      </div></div>
       <div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Ширина, мм</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         <div class="price-row"><input id="wmin" type="number" placeholder="от" class="num"><span>—</span><input id="wmax" type="number" placeholder="до" class="num"></div>
       </div></div>
+      <div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Длина, м</h4><span class="fg-caret">▸</span></button><div class="fg-body">
+        <div class="price-row"><input id="lmin" type="number" placeholder="от" class="num" step="0.1"><span>—</span><input id="lmax" type="number" placeholder="до" class="num" step="0.1"></div>
+      </div></div>
+      <div class="fg"><h4>Цена, ₽</h4>
+        <div class="price-row"><input id="pmin" type="number" placeholder="от" class="num"><span>—</span><input id="pmax" type="number" placeholder="до" class="num"></div>
+      </div>
       <button class="reset" onclick="resetF()">Сбросить фильтры</button>
     </aside>
 
@@ -74,7 +80,7 @@
 
       <div class="prods" id="prods">
         {% for p in products %}
-        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}" data-subcat="{{ p.category.slug }}" data-name="{{ p.name|lower }}" data-standard="{{ p.standard }}" data-grade="{{ p.grade }}" data-width="{{ p.width|default:0 }}">
+        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}" data-subcat="{{ p.category.slug }}" data-name="{{ p.name|lower }}" data-standard="{{ p.standard }}" data-grade="{{ p.grade }}" data-width="{{ p.width|default:0 }}" data-thickness="{{ p.thickness|default:0 }}" data-lenm="{{ p.length_m }}">
           <div class="ph has-img" style="background-image:url('{% static p.image_path %}')">
             <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
             <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
@@ -107,10 +113,12 @@ var PAGE=1, PAGE_SIZE=24;
 var QP=new URLSearchParams(location.search);
 var QTOKENS=(QP.get('q')||'').trim().toLowerCase().split(/\s+/).filter(Boolean);
 function sel(q){return [].slice.call(document.querySelectorAll(q+':checked')).map(function(c){return c.value;});}
-function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),subs:sel('.fsub'),labels:sel('.flabel'),species:sel('.fspec'),stds:sel('.fstd'),grades:sel('.fgrade'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,wmin:document.getElementById('wmin').value,wmax:document.getElementById('wmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
+function saveState(){try{localStorage.setItem(FKEY,JSON.stringify({cats:sel('.fcat'),subs:sel('.fsub'),labels:sel('.flabel'),species:sel('.fspec'),stds:sel('.fstd'),grades:sel('.fgrade'),stocks:sel('.fstock'),pmin:document.getElementById('pmin').value,pmax:document.getElementById('pmax').value,wmin:document.getElementById('wmin').value,wmax:document.getElementById('wmax').value,tmin:document.getElementById('tmin').value,tmax:document.getElementById('tmax').value,lmin:document.getElementById('lmin').value,lmax:document.getElementById('lmax').value,sort:document.getElementById('sort').value}));}catch(e){}}
 function applyF(){
   var cats=sel('.fcat'),subs=sel('.fsub'),labels=sel('.flabel'),species=sel('.fspec'),stocks=sel('.fstock'),stds=sel('.fstd'),grades=sel('.fgrade');
   var wmin=parseFloat(document.getElementById('wmin').value)||0, wmax=parseFloat(document.getElementById('wmax').value)||1e9;
+  var tmin=parseFloat(document.getElementById('tmin').value)||0, tmax=parseFloat(document.getElementById('tmax').value)||1e9;
+  var lmin=parseFloat(document.getElementById('lmin').value)||0, lmax=parseFloat(document.getElementById('lmax').value)||1e9;
   var gWithSub={}; document.querySelectorAll('.fsub:checked').forEach(function(e){gWithSub[e.dataset.group]=true;});
   var pmin=parseFloat(document.getElementById('pmin').value)||0;
   var pmax=parseFloat(document.getElementById('pmax').value)||1e12;
@@ -126,7 +134,9 @@ function applyF(){
     var okStd=!stds.length||stds.indexOf(c.dataset.standard)>-1;
     var okGrade=!grades.length||grades.indexOf(c.dataset.grade)>-1;
     var okW=(+c.dataset.width>=wmin)&&(+c.dataset.width<=wmax);
-    var ok=okCat&&okQ&&okLabel&&okSpec&&okStd&&okGrade&&okW&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
+    var okT=(+c.dataset.thickness>=tmin)&&(+c.dataset.thickness<=tmax);
+    var okL=(+c.dataset.lenm>=lmin)&&(+c.dataset.lenm<=lmax);
+    var ok=okCat&&okQ&&okLabel&&okSpec&&okStd&&okGrade&&okW&&okT&&okL&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
     c.style.display=ok?'':'none'; if(ok)shown++;
   });
   var sv=document.getElementById('sort').value, box=document.getElementById('prods');
@@ -157,6 +167,10 @@ function buildChips(){
   if(pmn||pmx)chip('Цена: '+(pmn||'0')+'\u2013'+(pmx||'\u221E')+' ₽',function(){document.getElementById('pmin').value='';document.getElementById('pmax').value='';});
   var wmn=document.getElementById('wmin').value,wmx=document.getElementById('wmax').value;
   if(wmn||wmx)chip('Ширина: '+(wmn||'0')+'\u2013'+(wmx||'\u221E')+' мм',function(){document.getElementById('wmin').value='';document.getElementById('wmax').value='';});
+  var tmn=document.getElementById('tmin').value,tmx=document.getElementById('tmax').value;
+  if(tmn||tmx)chip('Толщина: '+(tmn||'0')+'\u2013'+(tmx||'\u221E')+' мм',function(){document.getElementById('tmin').value='';document.getElementById('tmax').value='';});
+  var lmn=document.getElementById('lmin').value,lmx=document.getElementById('lmax').value;
+  if(lmn||lmx)chip('Длина: '+(lmn||'0')+'\u2013'+(lmx||'\u221E')+' м',function(){document.getElementById('lmin').value='';document.getElementById('lmax').value='';});
 }
 function renderPager(pages){
   var pg=document.getElementById('pager'); if(!pg)return;
@@ -176,7 +190,7 @@ document.querySelectorAll('.fsub').forEach(function(c){c.addEventListener('chang
 function toggleSub(btn){var subs=btn.closest('.catrow').nextElementSibling; if(subs&&subs.classList.contains('subs')){subs.classList.toggle('open');btn.classList.toggle('open');}}
 function toggleFg(btn){btn.closest('.fg').classList.toggle('open');}
 function openActiveGroups(){document.querySelectorAll('.fg.collapsible').forEach(function(g){var on=!!g.querySelector('input:checked');if(!on)g.querySelectorAll('input[type=number]').forEach(function(i){if(i.value)on=true;});if(on)g.classList.add('open');});}
-['pmin','pmax','wmin','wmax'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){PAGE=1;applyF();});});
+['pmin','pmax','wmin','wmax','tmin','tmax','lmin','lmax'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){PAGE=1;applyF();});});
 function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.querySelectorAll('.subs.open,.expand.open,.fg.collapsible.open').forEach(function(e){e.classList.remove('open');});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
 (function(){
   var params=new URLSearchParams(location.search), cat=params.get('cat'), spec=params.get('spec'), q=params.get('q');
@@ -196,6 +210,10 @@ function resetF(){document.querySelectorAll('.filters input').forEach(function(i
     (st.grades||[]).forEach(function(v){var e=document.querySelector('.fgrade[value="'+v+'"]');if(e)e.checked=true;});
     if(st.wmin)document.getElementById('wmin').value=st.wmin;
     if(st.wmax)document.getElementById('wmax').value=st.wmax;
+    if(st.tmin)document.getElementById('tmin').value=st.tmin;
+    if(st.tmax)document.getElementById('tmax').value=st.tmax;
+    if(st.lmin)document.getElementById('lmin').value=st.lmin;
+    if(st.lmax)document.getElementById('lmax').value=st.lmax;
     (st.stocks||[]).forEach(function(v){var e=document.querySelector('.fstock[value="'+v+'"]');if(e)e.checked=true;});
     if(st.pmin)document.getElementById('pmin').value=st.pmin;
     if(st.pmax)document.getElementById('pmax').value=st.pmax;

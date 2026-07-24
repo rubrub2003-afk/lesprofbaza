@@ -20,7 +20,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .cart span{position:absolute;top:-4px;right:-4px;background:var(--pine);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px}
 .crumbs{font-size:13px;color:var(--ink-soft);padding:18px 0}.crumbs a:hover{color:var(--forest)}
 /* верх карточки */
-.top{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;padding-bottom:24px;align-items:start}
+.top{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;padding-bottom:8px;align-items:start}
 .gallery .main{aspect-ratio:1/1;height:auto;border-radius:var(--radius);background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden;box-shadow:var(--shadow)}.gallery .main.has-img{background-size:cover;background-repeat:no-repeat;background-position:center;background-color:#fff;cursor:zoom-in}.gallery .main.has-img::before{display:none}
 .gallery .main::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.16) 0 4px,transparent 4px 16px)}
 .gallery .main .cap{position:absolute;left:14px;bottom:12px;color:rgba(255,255,255,.8);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-family:'Oswald'}
@@ -53,7 +53,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .perks{display:flex;gap:18px;margin-top:20px;flex-wrap:wrap;font-size:13px;color:var(--ink-soft)}
 .perks div{display:flex;gap:8px;align-items:center}.perks svg{width:20px;height:20px;color:var(--forest)}
 /* табы */
-.tabs{border-bottom:1px solid var(--line);display:flex;gap:26px;margin:14px 0 22px}
+.tabs{border-bottom:1px solid var(--line);display:flex;gap:26px;margin:2px 0 22px}
 .tabs button{border:0;background:transparent;font-family:'Oswald';text-transform:uppercase;font-size:15px;letter-spacing:.03em;padding:12px 2px;cursor:pointer;color:var(--ink-soft);border-bottom:3px solid transparent;margin-bottom:-1px}
 .tabs button.on{color:var(--ink);border-color:var(--pine)}
 .tabpane{display:none}.tabpane.on{display:block}
@@ -87,6 +87,7 @@ table.sorts tr:last-child td{border-bottom:0}
 .rel .ph{height:120px;background:linear-gradient(160deg,#caa06a,#9c7846)}
 .rel .b{padding:12px 14px}.rel h4{font-family:'Manrope';text-transform:none;font-size:14px;font-weight:700}.rel .pr{font-family:'Oswald';font-size:17px;margin-top:6px}
 section{padding:30px 0}
+.top+section{padding-top:6px}
 footer{background:#15140F;color:rgba(239,230,213,.7);padding:30px 0;font-size:13px;margin-top:20px}
 footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
 @media(max-width:900px){.top{grid-template-columns:1fr}.rel{grid-template-columns:repeat(2,1fr)}.search{display:none}}

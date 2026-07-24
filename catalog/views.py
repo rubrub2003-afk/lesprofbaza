@@ -28,21 +28,21 @@ def _render_list(request, category=None, title="Каталог пиломате�
     used = set(qs.values_list("species", flat=True))
     sp_names = {"pine_spruce": "Сосна / ель (хвоя)"}
     species_list = [(code, sp_names.get(code, name)) for code, name in Species.choices if code in used]
-    std_order = ["ГОСТ", "ТУ", "камерная сушка"]
+    std_order = ["ГОСТ", "ТУ", "Камерная сушка"]
     stds = sorted({s for s in qs.values_list("standard", flat=True) if s},
                   key=lambda x: std_order.index(x) if x in std_order else 99)
     present = {g for g in qs.values_list("grade", flat=True) if g}
-    # Сорт — качество древесины (единый порядок)
-    SORT_ORDER = ["1-й сорт", "2-й сорт", "2 сорт", "Экстра", "Прима",
+    # Сорт — качество древесины (единый порядок, включая сорта лиственницы)
+    SORT_ORDER = ["1-й сорт", "2-й сорт", "1 сорт", "2 сорт", "Экстра", "Прима",
                   "A", "B", "C", "D", "AB", "BC", "CD"]
     sort_set = set(SORT_ORDER)
     sorts_list = sorted([g for g in present if g in sort_set],
                         key=lambda x: SORT_ORDER.index(x))
-    # Тип — конструктив/обработка (всё остальное) по алфавиту
-    types_list = sorted([g for g in present if g not in sort_set], key=lambda x: x.lower())
-    # цельноламельная — как аналог/пара к сращённой
-    if "Сращенная" in types_list and "Цельноламельная" not in types_list:
-        types_list.append("Цельноламельная")
+    # Тип — фиксированный список (цельноламельная — пара к сращённой)
+    TYPE_ORDER = ["Сучковый", "Без сучковый", "Цельноламельная", "Сращенная"]
+    present_types = [g for g in present if g not in sort_set]
+    types_list = ([t for t in TYPE_ORDER if t in present_types or t == "Цельноламельная"]
+                  if present_types else [])
     return render(request, "catalog/list.html", {
         "title": title, "products": _decorate(qs), "current_category": category,
         "labels": Label.objects.all(), "species_list": species_list,

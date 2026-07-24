@@ -34,6 +34,14 @@ IMAGE_MAP = {
     ('Тетива', 'pine_spruce'): 'img/products/tetiva.jpg',
     ('Уголок', 'pine_spruce'): 'img/products/ugolok.jpg',
     ('Штапик', 'pine_spruce'): 'img/products/wtapik.jpg',
+    # Алиасы: лиственничные подкатегории слиты в базовые (фото по породе larch)
+    ('Брус клееный', 'larch'): 'img/products/brus-kleenyj-iz-listvennicy-larch.jpg',
+    ('Вагонка', 'larch'): 'img/products/vagonka-listvennica-larch.jpg',
+    ('Доска обрезная', 'larch'): 'img/products/doska-obreznaa-listvennica-larch.jpg',
+    ('Половая доска', 'larch'): 'img/products/polovaa-doska-listvennica-larch.jpg',
+    ('Мебельный щит', 'larch'): 'img/products/mebel-nyj-6it-listvennica-larch.jpg',
+    ('Имитация бруса', 'larch'): 'img/products/imitacia-brusa-listvennica-larch.jpg',
+    ('Террасная доска', 'larch'): 'img/products/terrasnaa-doska-listvennica-larch.jpg',
 }
 
 DESC_MAP = {

@@ -170,6 +170,10 @@ class Product(models.Model):
         return ""
 
     @property
+    def length_m(self):
+        return round(self.length / 1000, 2) if self.length else 0
+
+    @property
     def volume_per_piece(self):
         if self.thickness and self.width and self.length:
             return (self.thickness * self.width * self.length) / 1_000_000_000
