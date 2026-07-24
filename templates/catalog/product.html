@@ -27,7 +27,7 @@
 </div></header>
 
 <div class="wrap">
-  <div class="crumbs"><a href="#" onclick="history.back();return false" style="color:var(--forest);font-weight:700;margin-right:10px">← Назад</a><a href="{% url 'content:home' %}">Главная</a> / <a href="{% url 'catalog:index' %}">Каталог</a> / {% if product.category.parent %}<a href="{{ product.category.parent.get_absolute_url }}">{{ product.category.parent.name }}</a> / {% endif %}{{ product.name }}</div>
+  <div class="crumbs" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap"><span><a href="{% url 'content:home' %}">Главная</a> / <a href="{% url 'catalog:index' %}">Каталог</a> / {% if product.category.parent %}<a href="{{ product.category.parent.get_absolute_url }}">{{ product.category.parent.name }}</a> / {% endif %}{{ product.name }}</span><a href="#" onclick="history.back();return false" class="backpill">← Назад</a></div>
   <div class="top">
     <div class="gallery">
       <div class="main has-img" style="background-image:url('{% static product.image_path %}')" onclick="openLb('{% static product.image_path %}')" title="Открыть изображение">{% for l in product.labels.all %}{% if forloop.first %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endif %}{% endfor %}</div>

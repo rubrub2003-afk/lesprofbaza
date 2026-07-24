@@ -19,6 +19,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .iconbtn{width:46px;height:46px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--ink);position:relative}.iconbtn svg{width:21px;height:21px}.iconbtn:hover{border-color:var(--forest)}
 .cart span{position:absolute;top:-4px;right:-4px;background:var(--pine);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px}
 .crumbs{font-size:13px;color:var(--ink-soft);padding:18px 0}.crumbs a:hover{color:var(--forest)}
+.backpill{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:var(--forest);font-weight:700;font-size:13.5px;transition:border-color .2s,background .2s,transform .15s}.backpill:hover{border-color:var(--forest);background:#fff;transform:translateY(-1px)}
 /* верх карточки */
 .top{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;padding-bottom:8px;align-items:start}
 .gallery .main{aspect-ratio:1/1;height:auto;border-radius:var(--radius);background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden;box-shadow:var(--shadow)}.gallery .main.has-img{background-size:cover;background-repeat:no-repeat;background-position:center;background-color:#fff;cursor:zoom-in}.gallery .main.has-img::before{display:none}

@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Manrope',sans-serif;background:var(--sand);color:var(--ink)}a{color:inherit;text-decoration:none}
 .top{max-width:1000px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:11px}.logo .name{font-family:'Oswald';font-weight:700;font-size:21px}.logo .tag{font-size:10px;color:var(--ink-soft);text-transform:uppercase;margin-top:2px}
-.top .right{display:flex;gap:16px;align-items:center}.top a.lnk{color:var(--forest);font-weight:700;font-size:14px}.top a.out{color:#9a3b2e;font-weight:700;font-size:14px}
+.top .right{display:flex;gap:16px;align-items:center}.top a.lnk{color:var(--forest);font-weight:700;font-size:14px}.top a.pill{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color .2s,background .2s,transform .15s}.top a.pill:hover{border-color:var(--forest);background:#fff;transform:translateY(-1px)}.top a.out{color:#9a3b2e;font-weight:700;font-size:14px}
 .shell{max-width:1000px;margin:0 auto 60px;padding:0 24px}
 h1{font-family:'Oswald';text-transform:uppercase;font-size:clamp(26px,3.4vw,36px);margin:10px 0 6px}.sub{color:var(--ink-soft);margin-bottom:24px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
@@ -26,7 +26,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
 </style></head><body>
 <div class="top">
   <a class="logo" href="{% url 'content:home' %}"><img style="width:auto;height:46px" src="{% static 'img/emblem.png' %}" alt=""><span><div class="name">{{ site.company_name }}</div><div class="tag">личный кабинет</div></span></a>
-  <div class="right"><a class="lnk favlink" href="{% url 'catalog:favorites' %}">Избранное</a><a class="lnk" href="{% url 'content:home' %}">На сайт</a><a class="out" href="{% url 'orders:logout' %}" title="Выйти из кабинета" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></a></div>
+  <div class="right"><a class="lnk favlink" href="{% url 'catalog:favorites' %}">Избранное</a><a class="lnk pill" href="{% url 'content:home' %}">← На сайт</a><a class="out" href="{% url 'orders:logout' %}" title="Выйти из кабинета" style="display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></a></div>
 </div>
 <div class="shell">
   <h1>Здравствуйте{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</h1>

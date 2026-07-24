@@ -12,7 +12,7 @@ header.head{background:rgba(239,230,213,.94);border-bottom:1px solid var(--line)
 .logo{display:flex;align-items:center;gap:11px}.logo .mark{width:42px;height:42px}
 .logo .name{font-family:'Oswald';font-weight:700;font-size:21px;display:block}.logo .tag{font-size:10px;color:var(--ink-soft);text-transform:uppercase;display:block;margin-top:2px}
 .head-actions{margin-left:auto;display:flex;align-items:center;gap:12px}
-.back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}
+.back{font-size:13.5px;color:var(--forest);font-weight:700;border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 18px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color .2s,background .2s,transform .15s}.back:hover{border-color:var(--forest);background:#fff;transform:translateY(-1px)}
 .iconbtn{width:46px;height:46px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);display:grid;place-items:center;color:var(--ink)}.iconbtn svg{width:21px;height:21px}
 /* шаги */
 .steps{display:flex;gap:10px;align-items:center;padding:22px 0 6px;font-family:'Oswald';text-transform:uppercase;font-size:13px;letter-spacing:.06em;color:var(--ink-soft)}
