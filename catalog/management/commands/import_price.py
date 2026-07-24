@@ -115,15 +115,15 @@ def parse_softwood(ws):
                 t=th, w=wd, l=3000)
         elif section == "МЕБЕЛЬНЫЙ ЩИТ":
             if "клееный брус" in sub:
-                add(out, "Брус клееный", "Брус и брусок", G, p, u, t=t, w=w, l=l)
+                add(out, "Брус клееный", "Брус и брусок", G, p, u, grade="сучковый", t=t, w=w, l=l)
             elif "тетива" in sub:
-                add(out, "Тетива", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+                add(out, "Тетива", "Элементы лестниц", G, p, u, grade="сучковый", t=t, w=w, l=l)
             elif "перила" in sub:
-                add(out, "Перила", "Элементы лестниц", G, p, u, size_text=G)
+                add(out, "Перила", "Элементы лестниц", G, p, u, grade="без сучковый", size_text=G)
             elif "столб" in sub:
-                add(out, "Столб", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+                add(out, "Столб", "Элементы лестниц", G, p, u, grade="без сучковый", t=t, w=w, l=l)
             elif "балясина" in sub:
-                add(out, "Балясина", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+                add(out, "Балясина", "Элементы лестниц", G, p, u, grade="без сучковый", t=t, w=w, l=l)
             else:
                 # Сучковые: '18 × 200, 300, 400, 500, 600 × 3' → по каждой ширине
                 mm = re.match(r'\s*(\d+)\s*×\s*([\d,\s]+?)\s*×\s*(\d+)', G)

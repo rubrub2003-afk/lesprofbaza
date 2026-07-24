@@ -27,9 +27,16 @@ def _render_list(request, category=None, title="Каталог пиломате�
     qs = qs.order_by("-is_popular", "category", "name")
     used = set(qs.values_list("species", flat=True))
     species_list = [(code, name) for code, name in Species.choices if code in used]
+    std_order = ["ГОСТ", "ТУ", "камерная сушка"]
+    stds = sorted({s for s in qs.values_list("standard", flat=True) if s},
+                  key=lambda x: std_order.index(x) if x in std_order else 99)
+    grade_order = ["сучковый", "без сучковый", "Прима", "Сращенная", "2 сорт"]
+    grades = sorted({g for g in qs.values_list("grade", flat=True) if g},
+                    key=lambda x: grade_order.index(x) if x in grade_order else 99)
     return render(request, "catalog/list.html", {
         "title": title, "products": _decorate(qs), "current_category": category,
         "labels": Label.objects.all(), "species_list": species_list,
+        "standards_list": stds, "grades_list": grades,
     })
 
 
