@@ -23,7 +23,8 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .head-actions{display:flex;align-items:center;gap:11px}
 .back{font-size:13.5px;color:var(--forest);font-weight:700;white-space:nowrap}.back:hover{text-decoration:underline}
 /* хлебные крошки + заголовок */
-.crumbs{font-size:13px;color:var(--ink-soft);padding:18px 0 4px}.crumbs a:hover{color:var(--forest)}
+.crumbs{font-size:13px;color:var(--ink-soft);padding:18px 0 4px}
+.backpill{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;color:var(--forest);font-weight:700;font-size:13.5px;transition:border-color .2s,background .2s,transform .15s}.backpill:hover{border-color:var(--forest);background:#fff;transform:translateY(-1px)}.crumbs a:hover{color:var(--forest)}
 .page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:6px 0 22px;flex-wrap:wrap}
 .page-h h1{font-size:clamp(26px,3.4vw,40px)}.page-h .cnt{color:var(--ink-soft);font-size:14px}
 /* раскладка */
