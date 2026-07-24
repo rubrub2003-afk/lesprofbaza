@@ -80,7 +80,7 @@
 
       <div class="prods" id="prods">
         {% for p in products %}
-        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}" data-subcat="{{ p.category.slug }}" data-name="{{ p.name|lower }}" data-standard="{{ p.standard }}" data-grade="{{ p.grade }}" data-width="{{ p.width|default:0 }}" data-thickness="{{ p.thickness|default:0 }}" data-lenm="{{ p.length_m }}">
+        <article class="card" style="cursor:pointer" onclick="location.href='{{ p.get_absolute_url }}'" data-cat="{{ p.category.parent.slug }}" data-stock="{% if p.in_stock %}in{% else %}order{% endif %}" data-price="{{ p.price|unlocalize }}" data-pop="{% if p.is_popular or p.labels.all %}1{% else %}0{% endif %}" data-labels="{% for l in p.labels.all %}{{ l.id }} {% endfor %}" data-species="{{ p.species }}" data-subcat="{{ p.category.slug }}" data-name="{{ p.name|lower }}" data-standard="{{ p.standard }}" data-grade="{{ p.grade }}" data-width="{{ p.width|default:0 }}" data-thickness="{{ p.thickness|default:0 }}" data-lenm="{{ p.length_m|unlocalize }}">
           <div class="ph has-img" style="background-image:url('{% static p.image_path %}')">
             <div class="badges">{% for l in p.labels.all %}<span class="badge {% if l.color == 'forest' %}b-good{% elif l.color == 'dark' %}b-rec{% elif l.color == 'red' %}b-low{% else %}b-hit{% endif %}">{{ l.name }}</span>{% endfor %}</div>
             <span class="stock {% if not p.in_stock %}order{% endif %}">{% if p.in_stock %}В наличии{% else %}Под заказ{% endif %}</span>
@@ -135,7 +135,8 @@ function applyF(){
     var okGrade=!grades.length||grades.indexOf(c.dataset.grade)>-1;
     var okW=(+c.dataset.width>=wmin)&&(+c.dataset.width<=wmax);
     var okT=(+c.dataset.thickness>=tmin)&&(+c.dataset.thickness<=tmax);
-    var okL=(+c.dataset.lenm>=lmin)&&(+c.dataset.lenm<=lmax);
+    var lv=parseFloat((c.dataset.lenm||'0').replace(',','.'))||0;
+    var okL=(lv>=lmin)&&(lv<=lmax);
     var ok=okCat&&okQ&&okLabel&&okSpec&&okStd&&okGrade&&okW&&okT&&okL&&(!stocks.length||stocks.indexOf(c.dataset.stock)>-1)&&(+c.dataset.price>=pmin&&+c.dataset.price<=pmax);
     c.style.display=ok?'':'none'; if(ok)shown++;
   });
