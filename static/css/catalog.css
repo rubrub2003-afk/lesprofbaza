@@ -34,6 +34,12 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .chk{display:flex;align-items:center;gap:9px;font-size:14px;margin:8px 0;cursor:pointer;color:var(--ink-soft)}
 .chk input{width:16px;height:16px;accent-color:var(--forest)}
 .chk:hover{color:var(--ink)}
+.fg-head{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.fg-head h4{margin:0}
+.fg-caret{color:var(--ink-soft);font-size:12px;line-height:1;transition:transform .25s}
+.fg.collapsible.open .fg-caret{transform:rotate(90deg);color:var(--forest)}
+.fg-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .32s ease,opacity .25s ease,margin-top .2s}
+.fg.collapsible.open .fg-body{max-height:420px;opacity:1;margin-top:6px}
 .price-row{display:flex;gap:8px;align-items:center}
 .price-row input{width:100%;min-width:0;height:40px;border:1.5px solid var(--line);border-radius:9px;padding:0 10px;font-size:14px;font-family:inherit;background:#fff;outline:none}
 .price-row input:focus{border-color:var(--forest)}
@@ -47,7 +53,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .prods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .3s}
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
-.card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}.card .ph.has-img{background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#fff}.card .ph.has-img::before{display:none}
+.card .ph{aspect-ratio:1/1;height:auto;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}.card .ph.has-img{background-size:cover;background-repeat:no-repeat;background-position:center;background-color:#fff}.card .ph.has-img::before{display:none}
 .card .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 14px);transition:transform .4s}
 .card:hover .ph::before{transform:scale(1.06)}
 .card .ph .fav,.card .ph .cmp{position:absolute;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(251,247,239,.92);display:grid;place-items:center;color:var(--ink-soft);cursor:pointer;z-index:3;transition:color .2s,transform .15s}
@@ -55,7 +61,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .card .ph .fav:hover{color:var(--pine);transform:scale(1.12)}.card .ph .cmp:hover{color:var(--forest);transform:scale(1.12)}
 .badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;z-index:2}
 .badge{font-family:'Oswald';text-transform:uppercase;font-size:11px;letter-spacing:.06em;color:#fff;padding:4px 9px;border-radius:6px;font-weight:600;align-self:flex-start}
-.b-hit{background:var(--pine)}.b-good{background:var(--forest)}.b-low{background:#9a3b2e}.b-rec{background:#3a3733}
+.b-hit{background:var(--pine)}.b-good{background:var(--forest)}.b-low{background:#9a3b2e}.b-rec{background:#2f8f79}
 .stock{position:absolute;top:10px;right:10px;background:rgba(251,247,239,.92);color:var(--forest);font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;z-index:2}
 .stock.order{color:#9a3b2e}
 .card .body{padding:14px 15px 16px;display:flex;flex-direction:column;gap:8px;flex:1}

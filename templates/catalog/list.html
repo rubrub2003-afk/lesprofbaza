@@ -37,28 +37,31 @@
         {% if g.children.all %}<div class="subs">{% for sub in g.children.all %}<label class="chk chk-sub"><input type="checkbox" class="fsub" value="{{ sub.slug }}" data-group="{{ g.slug }}">{{ sub.name }}</label>{% endfor %}</div>{% endif %}
         {% endfor %}
       </div>
-      {% if species_list %}<div class="fg"><h4>Порода</h4>
+      {% if species_list %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Порода</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         {% for code, name in species_list %}<label class="chk"><input type="checkbox" class="fspec" value="{{ code }}">{{ name }}</label>{% endfor %}
-      </div>
-      {% if standards_list %}<div class="fg"><h4>Стандарт</h4>
+      </div></div>{% endif %}
+      {% if standards_list %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Стандарт</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         {% for st in standards_list %}<label class="chk"><input type="checkbox" class="fstd" value="{{ st }}">{{ st }}</label>{% endfor %}
-      </div>{% endif %}
-      {% if grades_list %}<div class="fg"><h4>Сорт / тип</h4>
-        {% for gr in grades_list %}<label class="chk"><input type="checkbox" class="fgrade" value="{{ gr }}">{{ gr }}</label>{% endfor %}
-      </div>{% endif %}{% endif %}
-      {% if labels %}<div class="fg"><h4>Метки</h4>
+      </div></div>{% endif %}
+      {% if sorts_list %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Сорт</h4><span class="fg-caret">▸</span></button><div class="fg-body">
+        {% for gr in sorts_list %}<label class="chk"><input type="checkbox" class="fgrade" value="{{ gr }}">{{ gr }}</label>{% endfor %}
+      </div></div>{% endif %}
+      {% if types_list %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Тип</h4><span class="fg-caret">▸</span></button><div class="fg-body">
+        {% for gr in types_list %}<label class="chk"><input type="checkbox" class="fgrade" value="{{ gr }}">{{ gr }}</label>{% endfor %}
+      </div></div>{% endif %}
+      {% if labels %}<div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Метки</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         {% for l in labels %}<label class="chk"><input type="checkbox" class="flabel" value="{{ l.id }}">{{ l.name }}</label>{% endfor %}
-      </div>{% endif %}
-      <div class="fg"><h4>Наличие</h4>
+      </div></div>{% endif %}
+      <div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Наличие</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         <label class="chk"><input type="checkbox" class="fstock" value="in">В наличии</label>
         <label class="chk"><input type="checkbox" class="fstock" value="order">Под заказ</label>
-      </div>
+      </div></div>
       <div class="fg"><h4>Цена, ₽</h4>
         <div class="price-row"><input id="pmin" type="number" placeholder="от" class="num"><span>—</span><input id="pmax" type="number" placeholder="до" class="num"></div>
       </div>
-      <div class="fg"><h4>Ширина, мм</h4>
+      <div class="fg collapsible"><button type="button" class="fg-head" onclick="toggleFg(this)"><h4>Ширина, мм</h4><span class="fg-caret">▸</span></button><div class="fg-body">
         <div class="price-row"><input id="wmin" type="number" placeholder="от" class="num"><span>—</span><input id="wmax" type="number" placeholder="до" class="num"></div>
-      </div>
+      </div></div>
       <button class="reset" onclick="resetF()">Сбросить фильтры</button>
     </aside>
 
@@ -171,8 +174,10 @@ document.querySelectorAll('.fsub').forEach(function(c){c.addEventListener('chang
   PAGE=1;applyF();
 });});
 function toggleSub(btn){var subs=btn.closest('.catrow').nextElementSibling; if(subs&&subs.classList.contains('subs')){subs.classList.toggle('open');btn.classList.toggle('open');}}
+function toggleFg(btn){btn.closest('.fg').classList.toggle('open');}
+function openActiveGroups(){document.querySelectorAll('.fg.collapsible').forEach(function(g){var on=!!g.querySelector('input:checked');if(!on)g.querySelectorAll('input[type=number]').forEach(function(i){if(i.value)on=true;});if(on)g.classList.add('open');});}
 ['pmin','pmax','wmin','wmax'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){PAGE=1;applyF();});});
-function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.querySelectorAll('.subs.open,.expand.open').forEach(function(e){e.classList.remove('open');});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
+function resetF(){document.querySelectorAll('.filters input').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';});document.querySelectorAll('.subs.open,.expand.open,.fg.collapsible.open').forEach(function(e){e.classList.remove('open');});document.getElementById('sort').value='pop';PAGE=1;try{localStorage.removeItem(FKEY);}catch(e){}applyF();}
 (function(){
   var params=new URLSearchParams(location.search), cat=params.get('cat'), spec=params.get('spec'), q=params.get('q');
   if(q){
@@ -196,6 +201,7 @@ function resetF(){document.querySelectorAll('.filters input').forEach(function(i
     if(st.pmax)document.getElementById('pmax').value=st.pmax;
     if(st.sort)document.getElementById('sort').value=st.sort;
   }}catch(e){}}
+  openActiveGroups();
   applyF();
 })();
 </script>

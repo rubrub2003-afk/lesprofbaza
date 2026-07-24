@@ -305,9 +305,62 @@ class Command(BaseCommand):
         except Exception:
             DESC_MAP = {}
         import html as _html
+        esc = _html.escape
+        NOTE = ('<div class="desc-note"><h4>Условия и сервис</h4><ul class="ticks">'
+                '<li>Доставка по Москве и Московской области — круглосуточно</li>'
+                '<li>Распил и подбор под ваш размер и задачу</li>'
+                '<li>Проверяем каждую партию перед отгрузкой</li>'
+                '<li>Для частных лиц — оплата после доставки</li>'
+                '</ul></div>')
+
+        def list_html(block):
+            lis = []
+            for ln in [x.strip() for x in block.split("\n") if x.strip()]:
+                done = False
+                for dash in (" — ", " – ", " - "):
+                    if dash in ln:
+                        a, _, b = ln.partition(dash)
+                        lis.append("<li><b>%s</b> — %s</li>" % (esc(a.strip()), esc(b.strip())))
+                        done = True
+                        break
+                if not done:
+                    lis.append("<li>%s</li>" % esc(ln))
+            return '<ul class="ticks">' + "".join(lis) + "</ul>"
+
         def to_html(t):
-            t = _html.escape(t.strip())
-            return "<p>" + t.replace("\n\n", "</p><p>").replace("\n", "<br>") + "</p>" if t else ""
+            t = (t or "").strip()
+            if not t:
+                return ""
+            blocks = [b.strip() for b in t.split("\n\n") if b.strip()]
+            out, i = [], 0
+            while i < len(blocks):
+                b = blocks[i]
+                low = b.lower()
+                if "\n" not in b and b.endswith(":") and len(b) < 40:
+                    out.append('<h4 class="desc-h">%s</h4>' % esc(b.rstrip(":")))
+                    if i + 1 < len(blocks):
+                        out.append(list_html(blocks[i + 1]))
+                        i += 2
+                        continue
+                    i += 1
+                    continue
+                if low.startswith("применение") or low.startswith("область применения"):
+                    head, _, rest = b.partition(":")
+                    rest = rest.strip()
+                    if rest:
+                        rest = rest[:1].upper() + rest[1:]
+                        out.append('<p class="desc-lead"><b>%s.</b> %s</p>' % (esc(head.strip()), esc(rest)))
+                    else:
+                        out.append('<h4 class="desc-h">%s</h4>' % esc(head.strip()))
+                    i += 1
+                    continue
+                if "\n" in b:
+                    out.append(list_html(b))
+                    i += 1
+                    continue
+                out.append("<p>%s</p>" % esc(b))
+                i += 1
+            return "".join(out)
         with transaction.atomic():
             groups = {}
             for i, g in enumerate(GROUPS):
@@ -328,7 +381,8 @@ class Command(BaseCommand):
                     thickness=it.get("thickness"), width=it.get("width"), length=it.get("length"),
                     size_text=it["size_text"], unit=it["unit"], price=it["price"],
                     description=(to_html(DESC_MAP.get(it["base"], ""))
-                                 + (it["desc"] if "sorts" in it.get("desc", "") else "")),
+                                 + (it["desc"] if "sorts" in it.get("desc", "") else "")
+                                 + NOTE),
                     in_stock=True, is_active=True)
                 n += 1
             self.stdout.write(self.style.SUCCESS(f"Создано товаров: {n}, подкатегорий: {len(sc)}"))
