@@ -3,6 +3,10 @@ from django.db import models
 from django.urls import reverse
 import re
 from django.utils.text import slugify
+try:
+    from catalog.media_map import IMAGE_MAP, RAZDEL_MAP
+except Exception:
+    IMAGE_MAP, RAZDEL_MAP = {}, {}
 
 
 def ru_slug(value):
@@ -58,6 +62,10 @@ class Category(models.Model):
     @property
     def is_group(self):
         return self.parent_id is None
+
+    @property
+    def razdel_image(self):
+        return RAZDEL_MAP.get(self.name)
 
 
 class Label(models.Model):
@@ -120,41 +128,11 @@ class Product(models.Model):
 
     @property
     def image_path(self):
-        """Статичная картинка-текстура по типу материала (fallback, если нет фото)."""
-        n = (self.category.name if self.category_id else "").lower()
-        sp = self.species
-
-        def h(*ks):
-            return any(k in n for k in ks)
-        if self.unit == "sheet" or "osb" in n:
-            fam = "osb"
-        elif h("вагонк"):
-            fam = "larch" if sp == "larch" else "vagonka"
-        elif h("блок"):
-            fam = "blokhaus"
-        elif h("планкен"):
-            fam = "larch" if sp == "larch" else "planken"
-        elif h("имитац"):
-            fam = "larch" if sp == "larch" else "imitaciya"
-        elif h("половая", "террас"):
-            fam = "larch" if sp == "larch" else "polovaya"
-        elif h("обрезная"):
-            fam = "larch_doska" if sp == "larch" else "doska"
-        elif h("строганная", "доска"):
-            fam = "doska"
-        elif h("брус клееный"):
-            fam = "brus"
-        elif h("рейка", "брусок"):
-            fam = "brusok"
-        elif h("плинтус", "уголок", "полувалик", "штапик", "раскладка", "наличник"):
-            fam = "pogonazh"
-        elif h("щит"):
-            fam = "shchit"
-        elif h("перила", "столб", "балясина", "тетива"):
-            fam = "lestnica"
-        else:
-            fam = "default"
-        return "img/products/" + fam + ".jpg"
+        """Картинка товара по подкатегории+породе (реальные фото), иначе заглушка."""
+        n = self.category.name if self.category_id else ""
+        return (IMAGE_MAP.get((n, self.species)) or IMAGE_MAP.get((n, "pine_spruce"))
+                or IMAGE_MAP.get((n, "larch")) or IMAGE_MAP.get((n, "other"))
+                or "img/products/default.jpg")
 
     @property
     def dimensions(self):
@@ -181,6 +159,15 @@ class Product(models.Model):
         if parts:
             return " × ".join(parts)
         return self.size_text
+
+    @property
+    def length_display(self):
+        if self.length:
+            return ("%g" % (self.length / 1000)).replace(".", ",") + " м"
+        segs = [x.strip() for x in re.split(r'[×хx]', self.size_text or '')]
+        if len(segs) >= 2 and any(ch in segs[-1] for ch in ("м", "–", "-")):
+            return segs[-1]
+        return ""
 
     @property
     def volume_per_piece(self):

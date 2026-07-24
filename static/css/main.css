@@ -75,6 +75,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.92);ba
 .hero-cta{display:flex;gap:14px;flex-wrap:wrap}
 .hero-photo{position:relative;height:380px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);background:linear-gradient(160deg,#6b5436,#3f3020);display:grid;place-items:center;text-align:center}
 .hero-photo .cap{color:rgba(239,230,213,.85);font-size:13.5px;max-width:18em;line-height:1.5;padding:0 20px}
+.hero-photo.has-img{background-size:cover;background-position:center}
 .hero-photo .cap b{display:block;font-family:'Oswald';text-transform:uppercase;letter-spacing:.1em;font-size:14px;color:#f1e3c7;margin-bottom:6px}
 
 /* ===== полоса с бобром ===== */
@@ -113,6 +114,7 @@ section{padding:62px 0}
 .cat .thumb{height:104px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}
 .cat .thumb::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.16) 0 3px,transparent 3px 13px)}
 .cat .thumb::after{content:"фото";position:absolute;right:8px;bottom:6px;color:rgba(255,255,255,.7);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.cat .thumb.has-img{background-size:cover;background-position:center}.cat .thumb.has-img::before,.cat .thumb.has-img::after{display:none}
 .cat .c-body{padding:14px 16px 18px;display:flex;flex-direction:column;gap:5px}
 .cat b{font-family:'Oswald';text-transform:uppercase;font-size:17px;letter-spacing:.02em}
 .cat small{color:var(--ink-soft);font-size:12.5px}
@@ -128,6 +130,7 @@ section{padding:62px 0}
 .spec-card:hover::before{transform:scale(1.05)}
 .sc-pine::before{background:repeating-linear-gradient(91deg,rgba(70,48,24,.13) 0 3px,transparent 3px 16px),radial-gradient(120% 120% at 20% 0,#e2c191,transparent 60%),linear-gradient(160deg,#cda874,#8f6c40)}
 .sc-larch::before{background:repeating-linear-gradient(91deg,rgba(60,30,14,.16) 0 3px,transparent 3px 16px),radial-gradient(120% 120% at 20% 0,#d69a68,transparent 60%),linear-gradient(160deg,#b87c4c,#6f3f22)}
+.spec-card.has-img{background-size:cover;background-position:center}.spec-card.has-img::before{display:none}
 .spec-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,12,.05) 30%,rgba(20,16,12,.86) 100%)}
 .sc-body{position:relative;z-index:2;padding:28px 30px;color:#fff}
 .sc-tag{display:inline-block;font-family:'Oswald';text-transform:uppercase;letter-spacing:.12em;font-size:11px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);backdrop-filter:blur(4px);padding:5px 12px;border-radius:999px;margin-bottom:12px}

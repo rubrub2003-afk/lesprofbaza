@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         # Версия каталога: при её смене прайс перезагружается на деплое.
-        CATALOG_VERSION = "2026-07-price-v3-nohidden-osb"
+        CATALOG_VERSION = "2026-07-v4-restructure-photos"
         from content.models import SiteSettings
         price = Path(settings.BASE_DIR) / "data" / "price.xlsx"
         ss = SiteSettings.load()

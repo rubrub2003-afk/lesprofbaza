@@ -63,6 +63,7 @@
       el.addEventListener('input',function(){
         var v=el.value;
         var c = dec ? v.replace(/[^0-9.,]/g,'').replace(',','.').replace(/(\..*)\./g,'$1') : v.replace(/[^0-9]/g,'');
+        var ip=c.split('.')[0]; if(ip.length>6){ c = ip.slice(0,6) + (c.indexOf('.')>-1 ? c.slice(c.indexOf('.')) : ''); }
         if(c!==v) el.value=c;
       });
     });

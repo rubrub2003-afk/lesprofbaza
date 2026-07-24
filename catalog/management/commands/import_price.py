@@ -1,9 +1,10 @@
-"""Импорт каталога из нового многолистового прайса (Сосна/ель + Лиственница).
+"""Импорт каталога из прайса ЛЕСПРОФБАЗА (Сосна/ель + Лиственница + OSB).
 
-Запуск:
-  python manage.py import_price [путь.xlsx] [--dry]
-Полностью пересобирает товары по прайсу (старые товары удаляются).
-Вагонка из липы пока пропускается. OSB не импортируется.
+Полностью пересобирает товары. Особые случаи:
+ • Наличник «A × B × 2.2 м (3 м)» с ценой «300 (350)» → две карточки (2.2 м и 3 м).
+ • Мебельный щит «18 × 200, 300, 400, 500, 600 × 3» → отдельные карточки по каждой ширине.
+ • Планкен прямой/скошенный — обе породы в одной подкатегории (фильтр по породе).
+ • Вагонка из липы и OSB-строки как надо. Сорта лиственницы — таблицей в описании.
 """
 import re
 from pathlib import Path
@@ -13,8 +14,8 @@ from django.db import transaction
 import openpyxl
 
 UNIT = {'м²': 'm2', 'м³': 'm3', 'пог. м': 'rm', 'пог.м': 'rm', 'шт': 'pc'}
-GROUPS = ["Вагонка", "Доска", "Брус и брусок", "Фасадные материалы",
-          "Погонаж", "Мебельный щит", "Элементы лестниц", "Плиты"]
+GROUPS = ["Брус и брусок", "Вагонка", "Доска", "Мебельный щит",
+          "Плиты", "Погонаж", "Фасадные материалы", "Элементы лестниц"]
 
 
 def money(s):
@@ -27,82 +28,35 @@ def money(s):
             unit = v
             break
     m = re.search(r'(\d[\d\s]*)', s)
-    price = int(m.group(1).replace(' ', '')) if m else None
-    return price, unit
+    return (int(m.group(1).replace(' ', '')) if m else None), unit
 
 
-def parse_dims(text):
-    """→ (thickness, width, length_mm, size_text). Чистый разбор только для 'A × B × C'."""
-    st = str(text).strip()
-    parts = re.split(r'[×хx]', st)
+def dims3(text):
+    """'16 × 120 × 6' → (16,120,6000). Длина (3-е число ≤20) в мм."""
+    parts = re.split(r'[×хx]', str(text))
     nums = []
     for p in parts:
         m = re.search(r'\d+(?:[.,]\d+)?', p)
         nums.append(float(m.group(0).replace(',', '.')) if m else None)
     t = w = l = None
-    clean = [n for n in nums if n is not None]
     if len(parts) >= 3 and nums[0] and nums[1] and nums[2] is not None:
-        t, w, lm = nums[0], nums[1], nums[2]
-        l = lm * 1000 if lm <= 20 else lm            # 3-е число ≤20 → метры
-    elif len(parts) == 2 and nums[0] and nums[1] is not None:
-        w, lm = nums[0], nums[1]
-        l = lm * 1000 if lm <= 20 else lm
-    return (int(t) if t else None, int(w) if w else None,
-            int(l) if l else None, st)
+        t, w = nums[0], nums[1]
+        l = nums[2] * 1000 if nums[2] <= 20 else nums[2]
+    elif len(parts) == 2 and nums[0] and nums[1] is not None:   # раскладка: ширина × длина
+        w = nums[0]
+        l = nums[1] * 1000 if nums[1] <= 20 else nums[1]
+    return (int(t) if t else None, int(w) if w else None, int(l) if l else None)
 
 
-# базовое имя по секции/подгруппе + категория (группа) + стандарт
-def soft_meta(section, subgroup):
-    sub = (subgroup or "").lower()
-    S = section
-    if S == "БРУСОК":
-        base = "Рейка" if "рейка" in sub else "Брусок"
-        grade = "2 сорт" if "сорт 2" in sub else ""
-        return base, "Брус и брусок", "", grade
-    if S == "ПЛИНТУС":
-        return ("Европлинтус" if "европлинтус" in sub else "Плинтус"), "Погонаж", "", ""
-    if S == "УГОЛОК":
-        return "Уголок", "Погонаж", "", ""
-    if S == "ПОЛУВАЛИК":
-        return ("Штапик" if "штапик" in sub else "Полувалик"), "Погонаж", "", ""
-    if S == "РАСКЛАДКА":
-        return "Раскладка", "Погонаж", "", ""
-    if S == "НАЛИЧНИК":
-        return "Наличник", "Погонаж", "", ""
-    if S == "МЕБЕЛЬНЫЙ ЩИТ":
-        if "клееный брус" in sub:
-            return "Брус клееный", "Брус и брусок", "", ""
-        if "тетива" in sub:
-            return "Тетива", "Элементы лестниц", "", ""
-        if "перила" in sub:
-            return "Перила", "Элементы лестниц", "", ""
-        if "столб" in sub:
-            return "Столб", "Элементы лестниц", "", ""
-        if "балясина" in sub:
-            return "Балясина", "Элементы лестниц", "", ""
-        return "Мебельный щит", "Мебельный щит", "", ""
-    if S == "ВАГОНКА ШТИЛЬ":
-        return ("Евровагонка" if "евровагонка" in sub else "Вагонка штиль"), "Вагонка", "", ""
-    if S == "ИМИТАЦИЯ БРУСА":
-        return "Имитация бруса", "Фасадные материалы", "", ""
-    if S == "ПОЛОВАЯ ДОСКА":
-        return "Половая доска", "Доска", "", ""
-    if S == "ДОСКА СТРОГАННАЯ":
-        return "Доска строганная", "Доска", "", ""
-    if S == "БЛОК-ХАУС":
-        return "Блок-хаус", "Фасадные материалы", "", ""
-    if S == "ПЛАНКЕН":
-        return ("Планкен косой" if "косой" in sub else "Планкен"), "Фасадные материалы", "", ""
-    if S and S.startswith("ДОСКА ОБРЕЗНАЯ"):
-        std = ""
-        if "камерн" in sub: std = "камерная сушка"
-        elif "гост" in sub: std = "ГОСТ"
-        elif "ту" in sub: std = "ТУ"
-        grade = "2 сорт" if "второй сорт" in sub else ""
-        return "Доска обрезная", "Доска", std, grade
-    return None
+def add(out, base, group, size, price, unit, species="pine_spruce",
+        standard="", grade="", t=None, w=None, l=None, size_text=None, desc=""):
+    out.append(dict(base=base, group=group, size=size, price=price, unit=unit,
+                    species=species, standard=standard, grade=grade,
+                    thickness=t, width=w, length=l,
+                    size_text=size_text or size, desc=desc))
 
 
+# ---------------- ХВОЯ ----------------
 def parse_softwood(ws):
     sec_re = re.compile(r'^\s*\d+\.\s+([А-ЯЁ].*)')
     section = subgroup = None
@@ -116,7 +70,7 @@ def parse_softwood(ws):
             continue
         m = sec_re.match(F)
         if m:
-            section = m.group(1).strip(); subgroup = None
+            section = m.group(1).strip().upper(); subgroup = None
             cur_price = cur_unit = None
             continue
         if F and not re.match(r'^\d+$', F):
@@ -125,128 +79,193 @@ def parse_softwood(ws):
                 cur_price, cur_unit = pr, un
             subgroup = F
             continue
-        if re.match(r'^\d+$', F) and G:
-            pr, un = money(J)
-            if pr:
-                cur_price, cur_unit = pr, un
-            meta = soft_meta(section, subgroup)
-            if not meta or section == "ВАГОНКА (Липа)":
-                continue
-            base, group, std, grade = meta
-            out.append(dict(base=base, group=group, standard=std, grade=grade,
-                            size=G, price=cur_price, unit=cur_unit,
-                            species="pine_spruce"))
+        if not (re.match(r'^\d+$', F) and G):
+            continue
+        pr, un = money(J)
+        if pr:
+            cur_price, cur_unit = pr, un
+        sub = (subgroup or "").lower()
+        p, u = cur_price, cur_unit
+        t, w, l = dims3(G)
+
+        if section == "ВАГОНКА (ЛИПА)":
+            continue
+        elif section == "БРУСОК":
+            base = "Рейка" if "рейка" in sub else "Брусок строганный"
+            add(out, base, "Брус и брусок", G, p, u, t=t, w=w, l=l)
+        elif section == "ПЛИНТУС":
+            add(out, "Европлинтус" if "европлинтус" in sub else "Плинтус",
+                "Погонаж", G, p, u, t=t, w=w, l=l)
+        elif section == "УГОЛОК":
+            add(out, "Уголок", "Погонаж", G, p, u, t=t, w=w, l=l)
+        elif section == "ШТАПИК":
+            add(out, "Штапик", "Погонаж", G, p, u, t=t, w=w, l=l)
+        elif section == "РАСКЛАДКА":
+            add(out, "Раскладка", "Погонаж", G, p, u, t=t, w=w, l=l)
+        elif section == "НАЛИЧНИК":
+            # 'A × B × 2.2 м (3 м)' цена 'X (Y)' → 2 карточки
+            p2 = re.findall(r'\d[\d\s]*', str(J).replace('\xa0', ' '))
+            price1 = int(p2[0].replace(' ', '')) if p2 else p
+            price2 = int(p2[1].replace(' ', '')) if len(p2) > 1 else price1
+            dm = re.findall(r'\d+', G.split('×')[0]) if '×' in G else []
+            th = int(re.findall(r'\d+', G)[0]); wd = int(re.findall(r'\d+', G)[1])
+            add(out, "Наличник", "Погонаж", f"{th} × {wd} × 2.2 м", price1, "pc",
+                t=th, w=wd, l=2200)
+            add(out, "Наличник", "Погонаж", f"{th} × {wd} × 3 м", price2, "pc",
+                t=th, w=wd, l=3000)
+        elif section == "МЕБЕЛЬНЫЙ ЩИТ":
+            if "клееный брус" in sub:
+                add(out, "Брус клееный", "Брус и брусок", G, p, u, t=t, w=w, l=l)
+            elif "тетива" in sub:
+                add(out, "Тетива", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+            elif "перила" in sub:
+                add(out, "Перила", "Элементы лестниц", G, p, u, size_text=G)
+            elif "столб" in sub:
+                add(out, "Столб", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+            elif "балясина" in sub:
+                add(out, "Балясина", "Элементы лестниц", G, p, u, t=t, w=w, l=l)
+            else:
+                # Сучковые: '18 × 200, 300, 400, 500, 600 × 3' → по каждой ширине
+                mm = re.match(r'\s*(\d+)\s*×\s*([\d,\s]+?)\s*×\s*(\d+)', G)
+                if mm:
+                    th = int(mm.group(1)); ln = int(mm.group(3))
+                    widths = [int(x) for x in re.findall(r'\d+', mm.group(2))]
+                    for wd in widths:
+                        add(out, "Мебельный щит", "Мебельный щит",
+                            f"{th} × {wd} × {ln}", p, u, grade="сучковый",
+                            t=th, w=wd, l=ln * 1000)
+                else:
+                    add(out, "Мебельный щит", "Мебельный щит", G, p, u,
+                        grade="сучковый", t=t, w=w, l=l)
+        elif section == "ВАГОНКА ШТИЛЬ":
+            add(out, "Евровагонка" if "евровагонка" in sub else "Вагонка штиль",
+                "Вагонка", G, p, u, t=t, w=w, l=l)
+        elif section == "ИМИТАЦИЯ БРУСА":
+            add(out, "Имитация бруса", "Фасадные материалы", G, p, u, t=t, w=w, l=l)
+        elif section == "ПОЛОВАЯ ДОСКА":
+            add(out, "Половая доска", "Доска", G, p, u, t=t, w=w, l=l)
+        elif section == "ДОСКА СТРОГАННАЯ":
+            add(out, "Доска строганная", "Доска", G, p, u, t=t, w=w, l=l)
+        elif section == "БЛОК-ХАУС":
+            add(out, "Блок-хаус", "Фасадные материалы", G, p, u, t=t, w=w, l=l)
+        elif section == "ПЛАНКЕН ПРЯМОЙ":
+            if "скошен" in sub or "косой" in sub:
+                add(out, "Планкен скошенный (косой)", "Фасадные материалы", G, p, u, t=t, w=w, l=l)
+            else:
+                add(out, "Планкен прямой", "Фасадные материалы", G, p, u, t=t, w=w, l=l)
+        elif section and section.startswith("ДОСКА ОБРЕЗНАЯ"):
+            std = ""; grade = ""
+            if "камерн" in sub: std = "камерная сушка"
+            elif "гост" in sub: std = "ГОСТ"
+            elif "ту" in sub: std = "ТУ"
+            if "второй сорт" in sub: grade = "2 сорт"
+            add(out, "Доска обрезная", "Доска", G, p, u, standard=std, grade=grade, t=t, w=w, l=l)
     return out
 
 
+# ---------------- ЛИСТВЕННИЦА ----------------
+def num(x):
+    m = re.search(r'\d[\d\s]*', str(x))
+    return int(m.group().replace(' ', '')) if m else None
+
+
+def sort_table(sorts):
+    rows = "".join(f"<tr><td>{k}</td><td>{num(v):,} ₽</td></tr>".replace(",", " ")
+                   for k, v in sorts.items() if num(v))
+    return ('<p class="sortnote">Цена зависит от сорта древесины (за м²):</p>'
+            '<table class="sorts"><tr><th>Сорт</th><th>Цена</th></tr>' + rows + '</table>')
+
+
 LARCH_MATRIX = {
-    "вагонка из лиственницы": ("Вагонка лиственница", "Вагонка", "larch"),
-    "террасная": ("Террасная доска лиственница", "Фасадные материалы", "larch"),
-    "половая доска из лиственницы": ("Половая доска лиственница", "Доска", "larch"),
-    "планкен лиственница": ("Планкен лиственница", "Фасадные материалы", "larch"),
-    "имитация бруса лиственница": ("Имитация бруса лиственница", "Фасадные материалы", "larch"),
-    "вагонка из ангарской сосны": ("Вагонка ангарская сосна", "Вагонка", "pine_spruce"),
+    "вагонка из лиственницы": [("Вагонка лиственница", "Вагонка", "larch")],
+    "террасная": [("Террасная доска лиственница", "Фасадные материалы", "larch")],
+    "половая доска из лиственницы": [("Половая доска лиственница", "Доска", "larch")],
+    "планкен прямой": [("Планкен прямой", "Фасадные материалы", "larch"),
+                       ("Планкен скошенный (косой)", "Фасадные материалы", "larch")],
+    "имитация бруса лиственница": [("Имитация бруса лиственница", "Фасадные материалы", "larch")],
+    "вагонка из ангарской сосны": [("Вагонка ангарская сосна", "Вагонка", "pine_spruce")],
 }
 
 
 def parse_larch(ws):
-    rows = list(ws.iter_rows(values_only=True))
     out = []
-    cur = None          # (base, group, species) for matrix sections
-    mode = None         # 'matrix' | 'shchit' | 'obrezn'
-    cur_price = None
-    for r in rows:
-        cells = [(str(c).strip() if c is not None else '') for c in r]
-        C, D, E, Fc, G, H, I = (cells[2], cells[3], cells[4], cells[5],
-                                cells[6], cells[7], cells[8])
-        joined = " ".join(cells).lower()
-        # section switch
+    targets = None; mode = None; cur_price = None
+    for r in ws.iter_rows(values_only=True):
+        c = [(str(x).strip() if x is not None else '') for x in r]
+        C, D, E, F, G = c[2], c[3], c[4], c[5], c[6]
+        low = C.lower()
         matched = False
         for key, val in LARCH_MATRIX.items():
-            if key in C.lower():
-                cur = val; mode = 'matrix'; matched = True; break
+            if key in low:
+                targets = val; mode = 'matrix'; matched = True; break
         if matched:
             continue
-        if "мебельный щит из лиственницы" in C.lower():
+        if "мебельный щит из лиственницы" in low:
             mode = 'shchit'; continue
-        if "обрезная доска из лиственницы" in C.lower():
+        if "обрезная доска" in low:
             mode = 'obrezn'; cur_price = None; continue
-        # skip header rows
-        if C in ("Толщина, мм", "Длина", "") and not re.match(r'^\d', C):
+        if "клееный брус из" in low:
+            mode = 'glue'; cur_price = None; continue
+        if not re.match(r'^\d', C) or not D:
             continue
-        # data rows
-        if mode == 'matrix' and re.match(r'^\d', C) and D:
-            base, group, species = cur
-            th = int(re.search(r'\d+', C).group())
-            wm = re.search(r'\d+', D)
-            wd = int(wm.group()) if wm else None
-            sorts = {'Экстра': E, 'Прима': Fc, 'АВ/В': G, 'ВС/С': H, 'СД/Д': I}
-            def num(x):
-                m = re.search(r'\d[\d\s]*', str(x))
-                return int(m.group().replace(' ', '')) if m else None
-            price = num(Fc) or num(E) or num(G)      # Прима, иначе Экстра/АВ
+        th = int(re.search(r'\d+', C).group())
+        wm = re.search(r'\d+', D); wd = int(wm.group()) if wm else None
+
+        if mode == 'matrix':
+            sorts = {'Экстра': E, 'Прима': F, 'АВ/В': G, 'ВС/С': c[7], 'СД/Д': c[8]}
+            price = num(F) or num(E) or num(G)
             if not price:
                 continue
-            size = (f"{th} × {wd}" if wd else f"{th}") + " × 2–4 м"
-            rows = "".join(f"<tr><td>{k}</td><td>{num(v):,} ₽</td></tr>".replace(",", " ")
-                           for k, v in sorts.items() if num(v))
-            desc = ('<p class="sortnote">Цена зависит от сорта древесины (за м²):</p>'
-                    '<table class="sorts"><tr><th>Сорт</th><th>Цена</th></tr>' + rows + '</table>')
-            out.append(dict(base=base, group=group, standard="", grade="Прима",
-                            size=size, price=price, unit="m2", species=species,
-                            thickness=th, width=wd, length=None, desc=desc))
-        elif mode == 'obrezn' and re.match(r'^\d', C) and D:
-            pr, un = money(Fc)
+            desc = sort_table(sorts)
+            for base, group, sp in targets:
+                add(out, base, group, f"{th} × {wd} × 2–4 м", price, "m2",
+                    species=sp, grade="Прима", t=th, w=wd, desc=desc)
+        elif mode == 'obrezn':
+            pr, _ = money(F)
             if pr:
                 cur_price = pr
-            th = int(re.search(r'\d+', C).group())
-            wd = int(re.search(r'\d+', D).group())
-            ln = re.search(r'\d+', E)
-            lnmm = int(ln.group()) * 1000 if ln else None
-            out.append(dict(base="Доска обрезная лиственница", group="Доска",
-                            standard="", grade="", size=f"{th} × {wd} × {E}",
-                            price=cur_price, unit="m3", species="larch",
-                            thickness=th, width=wd, length=lnmm, desc=""))
-        elif mode == 'shchit' and re.match(r'^\d', C):
-            th = int(re.search(r'\d+', C).group())
-            pr = re.search(r'\d[\d\s]*', str(G))
-            price = int(pr.group().replace(' ', '')) if pr else None
+            ln = re.search(r'\d+', E); lm = int(ln.group()) * 1000 if ln else None
+            add(out, "Доска обрезная лиственница", "Доска",
+                f"{th} × {wd} × {E}", cur_price, "m3", species="larch", t=th, w=wd, l=lm)
+        elif mode == 'glue':
+            pr, _ = money(E)
+            if pr:
+                cur_price = pr
+            add(out, "Брус клееный из лиственницы", "Брус и брусок",
+                f"{th} × {wd} × 6", cur_price, "m3", species="larch", t=th, w=wd, l=6000)
+        elif mode == 'shchit':
+            price = num(G)
             if not price:
                 continue
-            out.append(dict(base="Мебельный щит лиственница", group="Мебельный щит",
-                            standard="", grade=(Fc or ""), size=f"{th} × {D} × 2–4 м",
-                            price=price, unit="m2", species="larch",
-                            thickness=th, width=None, length=None, desc=""))
+            add(out, "Мебельный щит лиственница", "Мебельный щит",
+                f"{th} × {D}", price, "m2", species="larch", grade=(F or "Сращенная"), t=th)
     return out
 
 
 def parse_osb(ws):
     out = []
     for r in ws.iter_rows(values_only=True):
-        cells = [(str(c).strip() if c is not None else '') for c in r]
+        cells = [(str(x).strip() if x is not None else '') for x in r]
         th = size = price = None
-        for c in cells:
-            cc = c.replace(' ', '')
-            if th is None and re.fullmatch(r'\d{1,2}', cc):
-                th = int(cc); continue
-            if size is None and re.search(r'[x×х]', c) and re.search(r'\d', c):
-                size = c; continue
-            if price is None and re.fullmatch(r'\d{3,6}', cc):
-                price = int(cc)
+        for x in cells:
+            xx = x.replace(' ', '')
+            if th is None and re.fullmatch(r'\d{1,2}', xx):
+                th = int(xx); continue
+            if size is None and re.search(r'[x×х]', x) and re.search(r'\d', x):
+                size = x; continue
+            if price is None and re.fullmatch(r'\d{3,6}', xx):
+                price = int(xx)
         if th and size and price:
-            sheet = size.replace('x', '×').replace('X', '×').replace('х', '×').strip()
-            out.append(dict(base="OSB-плита", group="Плиты", standard="", grade="",
-                            size=f"{th} мм", size_text=f"лист {sheet} м",
-                            price=price, unit="sheet", species="other",
-                            thickness=th, width=None, length=None,
-                            desc=("Ориентированно-стружечная плита OSB-3 — прочная и влагостойкая. "
-                                  "Для чернового пола, обшивки стен, кровли и опалубки. "
-                                  f"Размер листа {sheet} м, толщина {th} мм.")))
+            sh = size.replace('x', '×').replace('X', '×').replace('х', '×').strip()
+            add(out, "ОСП (OSB-3) плита", "Плиты", f"{th} мм", price, "sheet",
+                species="other", t=th, size_text=f"лист {sh} м",
+                desc=("Ориентированно-стружечная плита OSB-3 — прочная и влагостойкая. "
+                      f"Для чернового пола, обшивки стен, кровли и опалубки. Лист {sh} м, толщина {th} мм."))
     return out
 
 
 class Command(BaseCommand):
-    help = "Импорт каталога из нового прайса"
+    help = "Импорт каталога из прайса"
 
     def add_arguments(self, parser):
         parser.add_argument("path", nargs="?", default=None)
@@ -257,66 +276,59 @@ class Command(BaseCommand):
         wb = openpyxl.load_workbook(path, data_only=True)
         soft = parse_softwood(wb["Сосна и ель"])
         larch = parse_larch(wb["Лиственница"])
-        osb_sheet = next((n for n in wb.sheetnames if "osb" in n.lower()), None)
-        osb = parse_osb(wb[osb_sheet]) if osb_sheet else []
-        items = soft + larch + osb
-        # финальные поля
+        osb_name = next((n for n in wb.sheetnames if "osb" in n.lower()), None)
+        osb = parse_osb(wb[osb_name]) if osb_name else []
+        items = [it for it in (soft + larch + osb) if it["price"]]
+
         for it in items:
-            if "thickness" not in it:
-                t, w, l, stext = parse_dims(it["size"])
-                it["thickness"], it["width"], it["length"] = t, w, l
-            it["size_text"] = it.get("size_text") or it["size"]
             name = f"{it['base']} {it['size']}"
             if it.get("standard"):
                 name += f", {it['standard']}"
             it["name"] = name
 
         from collections import Counter
-        by_group = Counter(it["group"] for it in items)
-        by_species = Counter(it["species"] for it in items)
+        by_g = Counter(it["group"] for it in items)
         self.stdout.write(f"Всего товаров: {len(items)}")
         for g in GROUPS:
-            self.stdout.write(f"  {by_group.get(g,0):3d}  {g}")
-        self.stdout.write(f"Породы: {dict(by_species)}")
-        no_price = [it for it in items if not it["price"]]
-        self.stdout.write(f"Без цены: {len(no_price)}")
-
+            self.stdout.write(f"  {by_g.get(g, 0):3d}  {g}")
+        self.stdout.write("Породы: " + str(dict(Counter(it["species"] for it in items))))
+        subcats = sorted(set((it["base"], it["group"]) for it in items))
+        self.stdout.write(f"Подкатегорий: {len(subcats)}")
         if opts["dry"]:
-            self.stdout.write("\n--- ЛИСТВЕННИЦА (образцы) ---")
-            for it in larch[:6] + larch[-4:]:
-                self.stdout.write(f"  {it['name']} | {it['price']} {it['unit']} | {it['species']}")
+            for b, g in subcats:
+                self.stdout.write(f"    {g} / {b}")
             return
 
         from catalog.models import Category, Product
+        try:
+            from catalog.media_map import DESC_MAP
+        except Exception:
+            DESC_MAP = {}
+        import html as _html
+        def to_html(t):
+            t = _html.escape(t.strip())
+            return "<p>" + t.replace("\n\n", "</p><p>").replace("\n", "<br>") + "</p>" if t else ""
         with transaction.atomic():
-            # группы
             groups = {}
             for i, g in enumerate(GROUPS):
-                obj, _ = Category.objects.get_or_create(name=g, parent=None,
-                                                        defaults={"order": i})
-                groups[g] = obj
-            # чистим старые товары и подкатегории
+                groups[g], _ = Category.objects.get_or_create(name=g, parent=None, defaults={"order": i})
             Product.objects.all().delete()
             Category.objects.filter(parent__isnull=False).delete()
-            # подкатегории (по базовому имени в своей группе)
-            subcats = {}
+            sc = {}
+
             def subcat(base, group):
-                key = (base, group)
-                if key not in subcats:
-                    subcats[key], _ = Category.objects.get_or_create(
-                        name=base, parent=groups[group])
-                return subcats[key]
-            created = 0
+                if (base, group) not in sc:
+                    sc[(base, group)], _ = Category.objects.get_or_create(name=base, parent=groups[group])
+                return sc[(base, group)]
+            n = 0
             for it in items:
-                if not it["price"]:
-                    continue
-                cat = subcat(it["base"], it["group"])
                 Product.objects.create(
-                    category=cat, name=it["name"], species=it["species"],
-                    grade=it.get("grade", ""), standard=it.get("standard", ""),
-                    thickness=it.get("thickness"), width=it.get("width"),
-                    length=it.get("length"), size_text=it["size_text"],
-                    unit=it["unit"], price=it["price"],
-                    description=it.get("desc", ""), in_stock=True, is_active=True)
-                created += 1
-            self.stdout.write(self.style.SUCCESS(f"Создано товаров: {created}, подкатегорий: {len(subcats)}"))
+                    category=subcat(it["base"], it["group"]), name=it["name"],
+                    species=it["species"], grade=it.get("grade", ""), standard=it.get("standard", ""),
+                    thickness=it.get("thickness"), width=it.get("width"), length=it.get("length"),
+                    size_text=it["size_text"], unit=it["unit"], price=it["price"],
+                    description=(to_html(DESC_MAP.get(it["base"], ""))
+                                 + (it["desc"] if "sorts" in it.get("desc", "") else "")),
+                    in_stock=True, is_active=True)
+                n += 1
+            self.stdout.write(self.style.SUCCESS(f"Создано товаров: {n}, подкатегорий: {len(sc)}"))

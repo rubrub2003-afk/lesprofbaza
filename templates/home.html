@@ -11,9 +11,7 @@
         <a class="btn btn-ghost" href="{% url 'content:calculator' %}">Рассчитать объём</a>
       </div>
     </div>
-    <div class="hero-photo reveal" aria-hidden="true">
-      <span class="cap"><b>Фото вашей продукции</b>Сюда поставим реальное фото ассортимента или процесса {{ site.company_name }}</span>
-    </div>
+    <div class="hero-photo reveal has-img" style="background-image:url('{% static 'img/home/hero.jpg' %}')" aria-hidden="true"></div>
   </div>
 </section>
 
@@ -25,7 +23,7 @@
     <div class="cats">
       {% for g in catalog_groups %}
       <a class="cat reveal" href="{% url 'catalog:index' %}?cat={{ g.slug }}">
-        {% if g.image %}<div class="thumb" style="background-image:url({{ g.image.url }});background-size:cover"></div>{% else %}<div class="thumb"></div>{% endif %}
+        {% if g.razdel_image %}<div class="thumb has-img" style="background-image:url('{% static g.razdel_image %}')"></div>{% else %}<div class="thumb"></div>{% endif %}
         <div class="c-body"><b>{{ g.name }}</b><small>{% if g.description %}{{ g.description }}{% else %}{% for c in g.children.all %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</small></div>
       </a>
       {% endfor %}
@@ -39,7 +37,7 @@
   <div class="wrap">
     <div class="sec-head reveal"><div><span class="eyebrow">Породы древесины</span><h2>Выберите породу под задачу</h2></div><a class="link" href="{% url 'catalog:index' %}">Весь каталог →</a></div>
     <div class="spec-grid">
-      <a class="spec-card sc-pine reveal" href="{% url 'catalog:index' %}?spec=pine_spruce">
+      <a class="spec-card sc-pine has-img reveal" style="background-image:url('{% static 'img/home/spec-pine.jpg' %}')" href="{% url 'catalog:index' %}?spec=pine_spruce">
         <div class="sc-body">
           <span class="sc-tag">Хвоя</span>
           <h3>Сосна и ель</h3>
@@ -47,7 +45,7 @@
           <span class="sc-go">Смотреть хвою →</span>
         </div>
       </a>
-      <a class="spec-card sc-larch reveal" href="{% url 'catalog:index' %}?spec=larch">
+      <a class="spec-card sc-larch has-img reveal" style="background-image:url('{% static 'img/home/spec-larch.jpg' %}')" href="{% url 'catalog:index' %}?spec=larch">
         <div class="sc-body">
           <span class="sc-tag">Премиум</span>
           <h3>Лиственница</h3>
@@ -150,7 +148,7 @@
 </section>
 
 <section class="delivery"><div class="wrap">
-  <div class="reveal"><h2>Доставка по Москве и Московской области</h2><p>Своим транспортом, круглосуточно (24/7). Возможен и самовывоз.</p></div>
+  <div class="reveal"><h2>Доставка по Москве и Московской области</h2><p>Доставку осуществляем по городу Москва и другим городам Московской области — своим транспортом, круглосуточно (24/7). Возможен и самовывоз.</p></div>
   <a class="btn btn-pine reveal" href="{% url 'content:page' 'dostavka-i-oplata' %}" style="padding:15px 26px;font-size:15px">Условия доставки</a>
 </div></section>
 {% endblock %}

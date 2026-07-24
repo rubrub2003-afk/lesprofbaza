@@ -55,7 +55,7 @@
     <div>
       <div class="toolbar">
         <div class="sortsel">Сортировка:
-          <select id="sort" onchange="PAGE=1;applyF()"><option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option></select>
+          <select id="sort" onchange="PAGE=1;applyF()"><option value="pop">Сначала популярные</option><option value="asc">Сначала дешевле</option><option value="desc">Сначала дороже</option><option value="az">По названию (А–Я)</option><option value="za">По названию (Я–А)</option></select>
         </div>
       </div>
 
@@ -116,6 +116,8 @@ function applyF(){
   var vis=cards.filter(function(c){return c.style.display!=='none';});
   if(sv==='asc') vis.sort(function(a,b){return a.dataset.price-b.dataset.price;});
   else if(sv==='desc') vis.sort(function(a,b){return b.dataset.price-a.dataset.price;});
+  else if(sv==='az') vis.sort(function(a,b){return (a.dataset.name||'').localeCompare(b.dataset.name||'','ru');});
+  else if(sv==='za') vis.sort(function(a,b){return (b.dataset.name||'').localeCompare(a.dataset.name||'','ru');});
   else vis.sort(function(a,b){return (b.dataset.pop-a.dataset.pop);});
   vis.forEach(function(c){box.appendChild(c);});
   var total=vis.length, pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
@@ -140,8 +142,8 @@ function renderPager(pages){
 function gotoPage(n){PAGE=Math.max(1,n);applyF();window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('.fcat,.flabel,.fspec,.fstock').forEach(function(c){c.addEventListener('change',function(){PAGE=1;applyF();});});
 document.querySelectorAll('.fsub').forEach(function(c){c.addEventListener('change',function(){
-  var g=c.dataset.group, any=document.querySelectorAll('.fsub[data-group="'+g+'"]:checked').length>0;
-  var gc=document.querySelector('.fcat[value="'+g+'"]'); if(gc)gc.checked=any;
+  var g=c.dataset.group;
+  var gc=document.querySelector('.fcat[value="'+g+'"]'); if(gc&&c.checked)gc.checked=true;
   PAGE=1;applyF();
 });});
 function toggleSub(btn){var subs=btn.closest('.catrow').nextElementSibling; if(subs&&subs.classList.contains('subs')){subs.classList.toggle('open');btn.classList.toggle('open');}}
