@@ -158,7 +158,7 @@ def parse_softwood(ws):
             if "камерн" in sub: std = "Камерная сушка"
             elif "гост" in sub: std = "ГОСТ"
             elif "ту" in sub: std = "ТУ"
-            if "второй сорт" in sub: grade = "2 сорт"
+            if "второй сорт" in sub: grade = "2-й сорт"
             add(out, "Доска обрезная", "Доска", G, p, u, standard=std, grade=grade, t=t, w=w, l=l)
     return out
 

@@ -8,7 +8,7 @@ body{font-family:'Manrope',system-ui,sans-serif;color:var(--ink);background:radi
 .logo{display:flex;align-items:center;gap:10px}.logo .mark{width:36px;height:36px}
 .logo .name{font-family:'Oswald';font-weight:700;font-size:18px;letter-spacing:.02em}.logo .tag{font-size:9.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-top:1px}
 .back{font-size:13.5px;color:var(--forest);font-weight:700}.back:hover{text-decoration:underline}
-.shell{max-width:980px;margin:auto;width:100%;padding:24px}
+.shell{max-width:980px;margin:0 auto;width:100%;padding:28px 24px 48px}
 .head h1{font-family:'Oswald';text-transform:uppercase;font-size:clamp(21px,2.8vw,28px);margin-bottom:2px}
 .head p{color:var(--ink-soft);font-size:13px;margin-bottom:14px}
 .grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;align-items:start}

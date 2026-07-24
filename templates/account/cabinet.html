@@ -47,7 +47,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px 10px;border-bottom:
     {% if orders %}
     <table><tr><th>Дата</th><th>Получение</th><th>Сумма</th><th>Статус</th><th></th></tr>
       {% for o in orders %}<tr class="ord"><td>{{ o.created|date:"d.m.Y" }}</td><td>{{ o.get_receive_display }}</td><td class="num">{{ o.total|floatformat:0|intcomma }} ₽</td><td><span class="badge {% if o.status == 'new' %}b-new{% elif o.status == 'in_progress' %}b-work{% elif o.status == 'shipping' %}b-ship{% else %}b-done{% endif %}">{{ o.get_status_display }}</span></td><td><a href="{% url 'orders:reorder' o.pk %}" style="color:var(--forest);font-weight:700;white-space:nowrap">↻ Повторить</a></td></tr>
-      <tr class="compo"><td colspan="5"><div class="compo-l">Состав заказа</div>{% for it in o.items.all %}<div class="ci"><span class="ci-n">{{ it.name }}</span><span class="ci-q">×{{ it.qty }}</span></div>{% empty %}<div class="ci">—</div>{% endfor %}</td></tr>{% endfor %}
+      <tr class="compo"><td colspan="5"><div class="compo-l">Состав заказа</div>{% for it in o.items.all %}<div class="ci"><span class="ci-n">{% if it.product and it.product.is_active %}<a href="{{ it.product.get_absolute_url }}" style="color:var(--forest);font-weight:600;text-decoration:underline">{{ it.name }}</a>{% else %}{{ it.name }}{% endif %}</span><span class="ci-q">×{{ it.qty }}</span></div>{% empty %}<div class="ci">—</div>{% endfor %}</td></tr>{% endfor %}
     </table>
     {% else %}<div class="empty">Заказов пока нет. <a href="{% url 'catalog:index' %}" style="color:var(--forest);font-weight:700">Перейти в каталог →</a></div>{% endif %}
   </div>

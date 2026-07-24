@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         # Версия каталога: при её смене прайс перезагружается на деплое.
-        CATALOG_VERSION = "2026-07-v7-larch-sorts"
+        CATALOG_VERSION = "2026-07-v8-sort-fixes"
         from content.models import SiteSettings
         price = Path(settings.BASE_DIR) / "data" / "price.xlsx"
         ss = SiteSettings.load()
