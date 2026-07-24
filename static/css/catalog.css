@@ -47,7 +47,7 @@ header.head{position:sticky;top:0;z-index:50;background:rgba(239,230,213,.94);ba
 .prods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:transform .2s,box-shadow .3s}
 .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
-.card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}.card .ph.has-img{background-size:cover;background-position:center}.card .ph.has-img::before{display:none}
+.card .ph{height:170px;background:linear-gradient(160deg,#caa06a,#9c7846);position:relative;overflow:hidden}.card .ph.has-img{background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#fff}.card .ph.has-img::before{display:none}
 .card .ph::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(91deg,rgba(70,48,24,.18) 0 3px,transparent 3px 14px);transition:transform .4s}
 .card:hover .ph::before{transform:scale(1.06)}
 .card .ph .fav,.card .ph .cmp{position:absolute;bottom:10px;width:34px;height:34px;border-radius:999px;background:rgba(251,247,239,.92);display:grid;place-items:center;color:var(--ink-soft);cursor:pointer;z-index:3;transition:color .2s,transform .15s}
